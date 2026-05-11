@@ -108,9 +108,11 @@ namespace PedalPlaits.Engines
             float mode2Ratio = 1f + timbre * 2f;
 
             // ── MORPH: decay ──
+            // v1.1 — tightened noise (wire-buzz) max from 700ms to 500ms.
+            // Body decay unchanged (already in a reasonable range).
             float morph = DspUtil.Clamp01(p.Morph);
             float ampDecaySec   = 0.05f + morph * 0.40f;   // 50..450 ms body
-            float noiseDecaySec = 0.10f + morph * 0.60f;   // 100..700 ms wire buzz
+            float noiseDecaySec = 0.10f + morph * 0.40f;   // 100..500 ms wire buzz
             _ampCoef   = MathF.Exp(-1f / (ampDecaySec   * _sr));
             _noiseCoef = MathF.Exp(-1f / (noiseDecaySec * _sr));
 

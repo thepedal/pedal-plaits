@@ -20,6 +20,15 @@ namespace PedalPlaits.Engines
     {
         public bool IsPercussive => false;
 
+        // v1.1 — quantised FM ratios (snap-to-table on HARMONICS).
+        // Eleven entries gives ~12-unit-wide HARMONICS bands. Spread
+        // matches Plaits' convention: more entries below 2.0 (where most
+        // musical FM happens) than above. 1.0 sits at index 3 — slightly
+        // below the centre of the knob, which is fine because clean
+        // 1:1 FM is a useful but not universal destination.
+        static readonly float[] FM_RATIOS =
+            { 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 5.0f, 7.0f, 11.0f };
+
         float _sr = 44100f;
         float _baseHz = 220f;
 
@@ -48,12 +57,20 @@ namespace PedalPlaits.Engines
 
         public void Render(float[] outBuf, float[] auxBuf, int n, in EngineParams p)
         {
-            // ── HARMONICS: modulator/carrier frequency ratio ──
-            // Smooth 0.25 .. 16 curve. Useful FM character lives anywhere
-            // here; the user can land on integer ratios by ear. A future
-            // refinement could snap to musically-meaningful ratios
-            // (0.5, 1, 1.5, 2, 3, 4, 5, 7, 11, …) like the original.
-            float ratio = 0.25f + p.Harmonics * 15.75f;
+            // ── HARMONICS: modulator/carrier frequency ratio (v1.1 — snap) ──
+            // Quantises to a fixed table of musically-useful ratios rather
+            // than sweeping smoothly. Each HARMONICS value maps to one of
+            // 11 ratios — landing on "clean" intervals by ear is much
+            // easier than threading a continuous knob to find 1:1 or 2:1.
+            // The table is biased slightly toward the lower end (more
+            // entries below 2.0 than above) because that's where most
+            // musically-useful FM lives. Index calculation:
+            //   index = (Harmonics01 * 11)  clamped to [0, 10]
+            // So HARMONICS values are grouped into ~12-unit-wide bands.
+            int rIdx = (int)(p.Harmonics * FM_RATIOS.Length);
+            if (rIdx >= FM_RATIOS.Length) rIdx = FM_RATIOS.Length - 1;
+            if (rIdx < 0) rIdx = 0;
+            float ratio = FM_RATIOS[rIdx];
 
             // ── TIMBRE: modulation index in RADIANS ──
             // 0 = no FM (pure carrier sine), 6 = aggressive bell-like

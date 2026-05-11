@@ -104,9 +104,13 @@ namespace PedalPlaits.Engines
             float damp       = 1f / qFactor;
 
             // ── MORPH: decay time ──
-            // Amp env decay 50 ms .. ~1 s, pitch env decay 20 ms .. 100 ms.
+            // v1.1 — tightened amp decay range from 50ms..1000ms to
+            // 50ms..500ms. The original 1s max was unrealistically long
+            // for drum-machine workflows; 80% of kicks live in 100-300ms.
+            // Knob middle (MORPH=64) now lands on ~275ms, a useful default.
+            // Pitch envelope range unchanged.
             float morph = DspUtil.Clamp01(p.Morph);
-            float ampDecaySec   = 0.05f + morph * 0.95f;
+            float ampDecaySec   = 0.05f + morph * 0.45f;
             float pitchDecaySec = 0.02f + morph * 0.08f;
             _ampCoef   = MathF.Exp(-1f / (ampDecaySec   * _sr));
             _pitchCoef = MathF.Exp(-1f / (pitchDecaySec * _sr));

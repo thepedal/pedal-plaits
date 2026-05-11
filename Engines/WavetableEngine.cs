@@ -217,10 +217,28 @@ namespace PedalPlaits.Engines
         // Archetype 0/4 — harmonic series with varying tilt.
         // row → number of partials (1..8)
         // col → spectral tilt (0 = natural 1/p, 1 = flat — all partials equal)
+        //
+        // v1.1 fix — at row=0 (numPartials=1), the tilt formula degenerates:
+        //   amp = (1/1)·(1-tilt) + (1/1)·tilt = 1
+        // so MORPH has no effect at that one corner. Without intervention
+        // the entire row=0 of bank 0 collapses to a pure sine regardless
+        // of MORPH. Workaround: at row=0, add a phase-distortion term
+        // driven by col so MORPH controls the waveshape (sine → distorted
+        // sine) instead of doing nothing. Other rows are unaffected.
         static float HarmonicSample(float phase, int row, int col)
         {
             int numPartials = 1 + row;
             float tilt = (float)col / (N_COLS - 1);   // 0..1
+
+            if (numPartials == 1)
+            {
+                // Single-partial special case — phase-distorted sine.
+                // tilt=0 → pure sine; tilt=1 → ~40% phase distortion.
+                float dist = tilt * 0.4f;
+                float p = phase + dist * MathF.Sin(2f * MathF.PI * phase);
+                return MathF.Sin(2f * MathF.PI * p);
+            }
+
             float sum = 0f;
             for (int p = 1; p <= numPartials; p++)
             {

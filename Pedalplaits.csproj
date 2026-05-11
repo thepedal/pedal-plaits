@@ -29,9 +29,13 @@
 
   <!-- Deploy to ReBuzz after every build. Generators live in Gear\Generators.
        ContinueOnError swallows the (expected) lock when ReBuzz is running with
-       the DLL loaded — close ReBuzz and rebuild to refresh. -->
+       the DLL loaded — close ReBuzz and rebuild to refresh.
+       Preset bundle (.prs.xml) deploys alongside the DLL per Build §3. -->
   <Target Name="DeployToReBuzz" AfterTargets="Build">
     <Copy SourceFiles="$(TargetPath)"
+          DestinationFolder="C:\Program Files\ReBuzz\Gear\Generators\"
+          ContinueOnError="true" />
+    <Copy SourceFiles="$(ProjectDir)Pedal Plaits_Presets.prs.xml"
           DestinationFolder="C:\Program Files\ReBuzz\Gear\Generators\"
           ContinueOnError="true" />
   </Target>
