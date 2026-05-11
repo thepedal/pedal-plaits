@@ -26,26 +26,34 @@ OUTPUT_FILE  = "Pedal Plaits_Presets.prs.xml"
 # Source declaration order (Pedalplaits.cs lines 84-117). Adding a new
 # parameter? APPEND only — see Build §3.3.
 PARAM_INDEX = {
-    "Engine":       0,
-    "Frequency":    1,
-    "Harmonics":    2,
-    "Timbre":       3,
-    "Morph":        4,
-    "LPG Response": 5,
-    "Decay":        6,
-    "Volume":       7,
+    "Engine":        0,
+    "Frequency":     1,
+    "Harmonics":     2,
+    "Timbre":        3,
+    "Morph":         4,
+    "LPG Response":  5,
+    "Decay":         6,
+    "Volume":        7,
+    "Vel Harmonics": 8,
+    "Vel Timbre":    9,
+    "Vel Morph":     10,
+    "Vel Decay":     11,
 }
 
 # Mirror of Pedalplaits.cs DefValue attributes.
 DEFAULTS = {
-    "Engine":       0,
-    "Frequency":    48,
-    "Harmonics":    64,
-    "Timbre":       64,
-    "Morph":        64,
-    "LPG Response": 0,
-    "Decay":        32,
-    "Volume":       100,
+    "Engine":        0,
+    "Frequency":     48,
+    "Harmonics":     64,
+    "Timbre":        64,
+    "Morph":         64,
+    "LPG Response":  0,
+    "Decay":         32,
+    "Volume":        100,
+    "Vel Harmonics": 64,
+    "Vel Timbre":    64,
+    "Vel Morph":     64,
+    "Vel Decay":     64,
 }
 
 # 50 presets, 5 per engine. Names follow PedalInvFFT §23.1 convention:

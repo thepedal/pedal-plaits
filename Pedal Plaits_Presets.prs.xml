@@ -11,6 +11,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="80" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="60" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -27,6 +31,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="70" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -43,6 +51,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="30" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -59,6 +71,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="20" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="120" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -75,6 +91,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="100" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -91,6 +111,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="80" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="50" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -107,6 +131,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="20" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="50" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -123,6 +151,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="80" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="127" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -139,6 +171,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="20" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -155,6 +191,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="80" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="60" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -171,6 +211,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="60" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -187,6 +231,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="80" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="90" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -203,6 +251,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="40" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -219,6 +271,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="40" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -235,6 +291,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="10" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="120" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -251,6 +311,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="127" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="120" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -267,6 +331,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="30" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -283,6 +351,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="80" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="70" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -299,6 +371,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="20" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -315,6 +391,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="20" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="127" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -331,6 +411,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="20" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="120" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -347,6 +431,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="60" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -363,6 +451,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="60" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="110" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -379,6 +471,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="80" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="70" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -395,6 +491,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="50" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -411,6 +511,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="110" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -427,6 +531,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="40" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="120" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -443,6 +551,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="80" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="60" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -459,6 +571,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="90" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -475,6 +591,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="30" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -491,6 +611,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="90" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -507,6 +631,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="90" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -523,6 +651,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="20" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -539,6 +671,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="20" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="120" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -555,6 +691,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="100" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="40" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -571,6 +711,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -587,6 +731,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -603,6 +751,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -619,6 +771,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -635,6 +791,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -651,6 +811,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -667,6 +831,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -683,6 +851,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -699,6 +871,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -715,6 +891,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -731,6 +911,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -747,6 +931,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -763,6 +951,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -779,6 +971,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>
@@ -795,6 +991,10 @@
         <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
         <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
         <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
       </Parameters>
       <Attributes />
       <Comment></Comment>

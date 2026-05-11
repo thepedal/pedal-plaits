@@ -130,6 +130,40 @@ namespace PedalPlaits
         public int Volume { get; set; } = 100;
 
         // ─────────────────────────────────────────────────────────
+        // v1.3 — Velocity sensitivity routing
+        // Each param is a bipolar depth: 64 = no modulation,
+        // 0   = full negative (harder velocity reduces target param),
+        // 127 = full positive (harder velocity increases target param).
+        // Applied as an offset to the smoothed param value per sub-block,
+        // with the resulting effective param clamped to [0,1].
+        // Max modulation at depth=0 or 127 with velocity=1.0 is ±0.5 of
+        // the target parameter's range.
+        // ─────────────────────────────────────────────────────────
+        [ParameterDecl(
+            Name = "Vel Harmonics",
+            Description = "Velocity sensitivity for Harmonics (64 = no modulation)",
+            MinValue = 0, MaxValue = 127, DefValue = 64)]
+        public int VelHarmonics { get; set; } = 64;
+
+        [ParameterDecl(
+            Name = "Vel Timbre",
+            Description = "Velocity sensitivity for Timbre (64 = no modulation)",
+            MinValue = 0, MaxValue = 127, DefValue = 64)]
+        public int VelTimbre { get; set; } = 64;
+
+        [ParameterDecl(
+            Name = "Vel Morph",
+            Description = "Velocity sensitivity for Morph (64 = no modulation)",
+            MinValue = 0, MaxValue = 127, DefValue = 64)]
+        public int VelMorph { get; set; } = 64;
+
+        [ParameterDecl(
+            Name = "Vel Decay",
+            Description = "Velocity sensitivity for Decay (64 = no modulation)",
+            MinValue = 0, MaxValue = 127, DefValue = 64)]
+        public int VelDecay { get; set; } = 64;
+
+        // ─────────────────────────────────────────────────────────
         // Track parameters (Group 2)
         // ─────────────────────────────────────────────────────────
 
@@ -258,6 +292,19 @@ namespace PedalPlaits
             _smDecay     = dcEnd;
             _smVolume    = vlEnd;
 
+            // ── v1.3 velocity routing ──
+            // Each Vel* param is a bipolar depth centered at 64. Convert to
+            // signed [-1,+1], multiply by current velocity, and scale by 0.5
+            // so max offset is ±0.5 of the target param's range at full
+            // velocity with extreme depth. Offsets are constant per Work()
+            // since _velocity is sticky between SetVelocity calls — no need
+            // to interpolate per sub-block. The smoothed base params still
+            // interpolate normally; the offset is added on top, then clamped.
+            float velOffH = ((VelHarmonics - 64) / 64f) * _velocity * 0.5f;
+            float velOffT = ((VelTimbre    - 64) / 64f) * _velocity * 0.5f;
+            float velOffM = ((VelMorph     - 64) / 64f) * _velocity * 0.5f;
+            float velOffD = ((VelDecay     - 64) / 64f) * _velocity * 0.5f;
+
             // Render in BLOCK_SIZE chunks. Per sub-block we linearly
             // interpolate each smoothed param between start- and
             // end-of-buffer values, sampled at the block midpoint.
@@ -271,11 +318,11 @@ namespace PedalPlaits
                 float t = (i + blk * 0.5f) * invN;
 
                 EngineParams pBlock;
-                pBlock.Harmonics   = hmStart + (hmEnd - hmStart) * t;
-                pBlock.Timbre      = tmStart + (tmEnd - tmStart) * t;
-                pBlock.Morph       = mpStart + (mpEnd - mpStart) * t;
+                pBlock.Harmonics   = Math.Clamp(hmStart + (hmEnd - hmStart) * t + velOffH, 0f, 1f);
+                pBlock.Timbre      = Math.Clamp(tmStart + (tmEnd - tmStart) * t + velOffT, 0f, 1f);
+                pBlock.Morph       = Math.Clamp(mpStart + (mpEnd - mpStart) * t + velOffM, 0f, 1f);
                 pBlock.LpgResponse = lpStart + (lpEnd - lpStart) * t;
-                pBlock.Decay       = dcStart + (dcEnd - dcStart) * t;
+                pBlock.Decay       = Math.Clamp(dcStart + (dcEnd - dcStart) * t + velOffD, 0f, 1f);
 
                 float volBlock = (vlStart + (vlEnd - vlStart) * t) * SAMPLE_SCALE;
 
