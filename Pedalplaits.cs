@@ -49,6 +49,19 @@ namespace PedalPlaits
         float _velocity = 100f / 127f;   // sticky — last value retains until changed
         bool _wasPlaying;                // for transport-stop edge detection (Core §27)
 
+        // v1.2 — per-Work parameter smoothing state. Holds the END-of-buffer
+        // smoothed value from the previous Work() call, which becomes the
+        // START-of-buffer value for the next one. Per-sub-block linear
+        // interpolation between start and end gives the engine progressively
+        // changing params instead of buffer-boundary discontinuities (zipper
+        // noise). Initialized lazily on first Work() to current property
+        // values so there's no startup ramp from zero.
+        float _smHarmonics, _smTimbre, _smMorph, _smLpg, _smDecay, _smVolume;
+        bool  _smoothInit;
+        // Smoothing time constant (10 ms) — fast enough to track most LFO
+        // modulation, slow enough to remove buffer-rate stepping artefacts.
+        const float SMOOTH_SECS = 0.010f;
+
         // Block-scratch buffers (allocated once, reused — no audio-thread allocation)
         readonly float[] _scratchOut = new float[BLOCK_SIZE];
         readonly float[] _scratchAux = new float[BLOCK_SIZE];
@@ -197,29 +210,90 @@ namespace PedalPlaits
             if (_voice.CurrentEngineIndex != Engine)
                 _voice.SetEngine(Engine);
 
-            float volScale = (Volume / 127f) * SAMPLE_SCALE;
+            // ── v1.2 parameter smoothing ──
+            // Targets are the current property values; we ease toward them
+            // over SMOOTH_SECS rather than jumping per buffer. Per-Work
+            // coefficient is exact-exponential so total smoothing time stays
+            // constant regardless of host buffer size n.
+            float harmonicsT = Harmonics    / 127f;
+            float timbreT    = Timbre       / 127f;
+            float morphT     = Morph        / 127f;
+            float lpgT       = LpgResponse  / 127f;
+            float decayT     = Decay        / 127f;
+            float volumeT    = Volume       / 127f;
 
-            // Render in BLOCK_SIZE chunks
+            if (!_smoothInit)
+            {
+                _smHarmonics = harmonicsT;
+                _smTimbre    = timbreT;
+                _smMorph     = morphT;
+                _smLpg       = lpgT;
+                _smDecay     = decayT;
+                _smVolume    = volumeT;
+                _smoothInit  = true;
+            }
+
+            // Start values for this buffer = end of previous buffer.
+            float hmStart = _smHarmonics;
+            float tmStart = _smTimbre;
+            float mpStart = _smMorph;
+            float lpStart = _smLpg;
+            float dcStart = _smDecay;
+            float vlStart = _smVolume;
+
+            // Smooth toward target over this buffer.
+            float smoothCoef = 1f - MathF.Exp(-n / (SMOOTH_SECS * _lastSr));
+            float hmEnd = hmStart + (harmonicsT - hmStart) * smoothCoef;
+            float tmEnd = tmStart + (timbreT    - tmStart) * smoothCoef;
+            float mpEnd = mpStart + (morphT     - mpStart) * smoothCoef;
+            float lpEnd = lpStart + (lpgT       - lpStart) * smoothCoef;
+            float dcEnd = dcStart + (decayT     - dcStart) * smoothCoef;
+            float vlEnd = vlStart + (volumeT    - vlStart) * smoothCoef;
+
+            // Persist end-of-buffer values for next Work().
+            _smHarmonics = hmEnd;
+            _smTimbre    = tmEnd;
+            _smMorph     = mpEnd;
+            _smLpg       = lpEnd;
+            _smDecay     = dcEnd;
+            _smVolume    = vlEnd;
+
+            // Render in BLOCK_SIZE chunks. Per sub-block we linearly
+            // interpolate each smoothed param between start- and
+            // end-of-buffer values, sampled at the block midpoint.
+            float invN = 1f / n;
             int i = 0;
-            var p = ParamsSnapshot();
             while (i < n)
             {
                 int blk = Math.Min(BLOCK_SIZE, n - i);
+
+                // Block-midpoint position within the buffer (0..1).
+                float t = (i + blk * 0.5f) * invN;
+
+                EngineParams pBlock;
+                pBlock.Harmonics   = hmStart + (hmEnd - hmStart) * t;
+                pBlock.Timbre      = tmStart + (tmEnd - tmStart) * t;
+                pBlock.Morph       = mpStart + (mpEnd - mpStart) * t;
+                pBlock.LpgResponse = lpStart + (lpEnd - lpStart) * t;
+                pBlock.Decay       = dcStart + (dcEnd - dcStart) * t;
+
+                float volBlock = (vlStart + (vlEnd - vlStart) * t) * SAMPLE_SCALE;
+
                 Array.Clear(_scratchOut, 0, blk);
                 Array.Clear(_scratchAux, 0, blk);
 
-                _voice.Render(_scratchOut, _scratchAux, blk, in p);
+                _voice.Render(_scratchOut, _scratchAux, blk, in pBlock);
 
                 if (outBuf != null)
                     for (int k = 0; k < blk; k++)
                     {
-                        float s = _scratchOut[k] * volScale;
+                        float s = _scratchOut[k] * volBlock;
                         outBuf[i + k] = new Sample(s, s);
                     }
                 if (auxBuf != null)
                     for (int k = 0; k < blk; k++)
                     {
-                        float s = _scratchAux[k] * volScale;
+                        float s = _scratchAux[k] * volBlock;
                         auxBuf[i + k] = new Sample(s, s);
                     }
                 i += blk;
