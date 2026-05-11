@@ -2,9 +2,10 @@
 
 ReBuzz managed machine — port of Mutable Instruments' Plaits macro-oscillator.
 
-**Status:** v1.3 — 10 engines, mono voice, OUT + AUX outputs, per-Work
-parameter smoothing (v1.2) + velocity sensitivity routing (v1.3),
-50-preset factory bank.
+**Status:** v1.4 — 10 engines, mono voice, OUT + AUX outputs, per-Work
+parameter smoothing (v1.2) + velocity sensitivity routing (v1.3) +
+Plaits-faithful wavetable banks 0/4 and 3/7 + hardsync-formants region
+on engine 0 + vactrol-modeled LPG (v1.4), 50-preset factory bank.
 
 **Original source:** https://github.com/pichenettes/eurorack/tree/master/plaits
 **License:** MIT (Plaits firmware is MIT-licensed; this port preserves
@@ -37,7 +38,7 @@ the appendix for what was skipped and why.
 | Harmonics      | 0–127  | Engine-specific character — see engine reference |
 | Timbre         | 0–127  | Engine-specific character — see engine reference |
 | Morph          | 0–127  | Engine-specific character — see engine reference |
-| LPG Response   | 0–127  | 0 = pure filter modulation; 127 = pure amplitude (VCA) |
+| LPG Response   | 0–127  | 0 = pure filter modulation; 127 = pure amplitude (VCA). Both modes pass through the vactrol envelope follower (5 ms attack / 30 ms release) which adds a small softening to the attack and a slight extension to the release. |
 | Decay          | 0–127  | Internal envelope decay time (~5 ms to ~5 s, exponential) |
 | Volume         | 0–127  | Final output level |
 
@@ -81,9 +82,12 @@ three engines; everything else is shared.
 Two PolyBLEP oscillators with detune. Analog-style leads, pads, basses.
 
 - **HARMONICS:** detuning between osc 1 and osc 2 — 0 = unison, 127 ≈ semitone
-- **TIMBRE:** variable-pulse width on osc 2 — narrow pulse → full square
-- **MORPH:** osc 1 waveform — triangle → saw → notched saw
-- **AUX:** ring modulation of osc 1 and osc 2
+- **TIMBRE:** narrow pulse → full square (low half) → hardsync formants (high half).
+  Hardsync slave fades in past noon, its frequency rising exponentially from
+  1× to 8× master — sweep MORPH-shaped saw against bright formant peak.
+- **MORPH:** osc 1 waveform — triangle → saw → notched saw (Braids' CSAW)
+- **AUX:** ring modulation of osc 1 and osc 2 (v1.5+ TODO: faithful
+  "sum of two hardsync'd waveforms")
 
 ### 1 — Waveshaping
 
@@ -121,10 +125,10 @@ time and shared statically across machine instances (~512 KB once). A
 navigable 2D map of timbres per bank.
 
 - **HARMONICS:** bank selection (discrete jump between banks)
-  - 0/4: harmonic series with spectral tilt
-  - 1/5: sine wavefolder with asymmetry
-  - 2/6: inharmonic partial sums
-  - 3/7: narrow-band formant peaks
+  - 0/4: Plaits bank_1 — mild additive (sines, drawbars, comb, pair, tri/saw stacks)
+  - 1/5: sine wavefolder with asymmetry (algorithmic)
+  - 2/6: inharmonic partial sums (algorithmic)
+  - 3/7: Plaits bank_2 — formantish (trisaw, sawtri, burst, formants, pulse, sine-power)
 
   Banks 0–3 are *interpolated* (smooth TIMBRE/MORPH sweeps).
   Banks 4–7 are *stepped* (click-jumps between cells — deliberate digital character).
@@ -232,6 +236,7 @@ ReBuzz Work(IList<Sample[]>, n, mode)
 | `Engines/FmEngine.cs`             | Engine 2 |
 | `Engines/HarmonicEngine.cs`       | Engine 3 |
 | `Engines/WavetableEngine.cs`      | Engine 4 (static wavetables, shared across instances) |
+| `Engines/PlaitsWavetables.cs`     | Plaits-faithful wave generators (bank_1, bank_2 — v1.4) |
 | `Engines/GranularCloudEngine.cs`  | Engine 5 |
 | `Engines/FilteredNoiseEngine.cs`  | Engine 6 |
 | `Engines/BassDrumEngine.cs`       | Engine 7 (first percussive) |
@@ -261,22 +266,38 @@ and silences MSB3277. Only the `.dll` is deployed.
 
 ## Known limitations
 
-- **Wavetable engine 4** uses algorithmically-generated tables rather than
-  the original Plaits wavetable data. Character is Plaits-*like* but not
-  bit-identical. A `Resources.cs` binary loader could swap in extracted
-  tables in a future revision; the architecture supports it.
+- **Wavetable engine 4 — banks 1/5 and 2/6** (the wavefolder and
+  inharmonic archetypes) remain algorithmically generated. Plaits'
+  bank_3 (shruthi/ambika/braids-derived) wasn't ported here because it
+  requires the binary `waves.bin` resource from the Plaits source tree,
+  which contains Braids waveform data and isn't redistributed in this
+  port. Banks 0/4 and 3/7 are now built from the same generator
+  functions as Plaits' bank_1 (mild additive) and bank_2 (formantish)
+  respectively — see `Engines/PlaitsWavetables.cs`.
 - **Wavetable aliasing at very high pitches** (C-7 and above) — no
   mip-mapped table variants. Stay within typical musical ranges for clean
   output.
-- **Engine 0** takes a shortcut on the `hardsync formants` end of TIMBRE,
-  treating it as a continuation of the variable-pulse range rather than
-  the separate hardsync mode of the original.
+- **Engine 0 hardsync** (v1.4) uses a phase-derived slave with PolyBLEP
+  on its own wraps but suppresses the correction for one sample after
+  each master wrap — the master-induced reset has variable discontinuity
+  magnitude that standard PolyBLEP would over-correct. Audible as some
+  high-frequency aliasing at non-integer sync ratios (TIMBRE between
+  the integer-ratio sweet spots) at high pitches. v1.5+ target: scaled
+  PolyBLEP correction at master wrap, or oversampling.
+- **Engine 0 AUX** still ring-mods osc 1 and osc 2. Plaits' actual AUX
+  is "sum of two hardsync'd waveforms" with MORPH controlling slave
+  shape and HARMONICS controlling detuning between the pair. Deferred
+  to a future revision.
 - **Engine 2 (FM)** uses a smooth ratio sweep on HARMONICS rather than
   snapping to musically-useful ratios (0.5, 1, 2, 3, 4, 5, 7, 11…).
   No anti-aliasing on high-modulation-index sidebands either, so very
   high pitches with TIMBRE near maximum may grit slightly.
-- **LPG** is a simplified 1-pole + amp rather than a full vactrol-modelled
-  low-pass gate. Audible difference is minimal except at very short Decay.
+- **LPG vactrol modeling** (v1.4) is a first-order asymmetric envelope
+  follower (5 ms attack, 30 ms release) applied to both VCA gain and
+  filter cutoff. The non-linear LDR transfer curve isn't modeled —
+  Plaits adds a power-law mapping that gives a slight "ducking" feel
+  on hard strikes; that subtle behavior is deferred to a future
+  revision.
 - **Mono only.** Polyphony would require significant per-voice memory
   expansion (wavetable + harmonic engines have large per-voice state).
 
@@ -307,7 +328,10 @@ architectural change.
 
 DSP architecture and engine designs by Émilie Gillet (Mutable Instruments),
 released under the MIT license. This C# port preserves that license and is
-not affiliated with or endorsed by Mutable Instruments.
+not affiliated with or endorsed by Mutable Instruments. The wavetable
+generation functions in `Engines/PlaitsWavetables.cs` (banks 0/4 and 3/7
+of engine 4) are direct ports of the algorithms in
+`plaits/resources/wavetables.py` from the Plaits firmware source.
 
 Core ReBuzz managed-machine findings used by this port are documented in
 the project's `ReBuzz_ManagedMachine_Notes_Core.md` (§27 transport stop,

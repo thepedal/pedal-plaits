@@ -170,6 +170,17 @@ namespace PedalPlaits.Engines
         {
             s_wavetables = new float[N_BANKS * N_ROWS * N_COLS * WAVE_LEN];
 
+            // v1.4 — Plaits-faithful waves for archetypes 0 (bank_1: mild
+            // additive) and 3 (bank_2: formantish), ported from
+            // plaits/resources/wavetables.py via PlaitsWavetables.cs.
+            //
+            // Archetypes 1 (wavefold) and 2 (inharmonic) remain algorithmic.
+            // Plaits' bank_3 (shruthi/ambika/braids-derived) is not ported:
+            // it requires plaits/resources/waves.bin, which we don't
+            // redistribute.
+            float[][] plaitsBank1 = PlaitsWavetables.BuildBank1(WAVE_LEN);
+            float[][] plaitsBank2 = PlaitsWavetables.BuildBank2(WAVE_LEN);
+
             for (int bank = 0; bank < N_BANKS; bank++)
             {
                 int archetype = bank % 4;
@@ -177,35 +188,37 @@ namespace PedalPlaits.Engines
                 {
                     for (int col = 0; col < N_COLS; col++)
                     {
-                        GenerateOneCell(bank, archetype, row, col);
+                        int baseIdx = CellOffset(bank, row, col);
+                        if (archetype == 0)
+                        {
+                            Array.Copy(plaitsBank1[row * N_COLS + col], 0,
+                                       s_wavetables, baseIdx, WAVE_LEN);
+                            NormalizeCell(baseIdx);
+                        }
+                        else if (archetype == 3)
+                        {
+                            Array.Copy(plaitsBank2[row * N_COLS + col], 0,
+                                       s_wavetables, baseIdx, WAVE_LEN);
+                            NormalizeCell(baseIdx);
+                        }
+                        else
+                        {
+                            GenerateOneCell(bank, archetype, row, col);
+                        }
                     }
                 }
             }
         }
 
-        static void GenerateOneCell(int bank, int archetype, int row, int col)
+        // Normalize one wavetable cell to ±1 peak amplitude.
+        static void NormalizeCell(int baseIdx)
         {
-            int baseIdx = CellOffset(bank, row, col);
             float peak = 0f;
-
-            // First pass — fill with raw samples per archetype
             for (int s = 0; s < WAVE_LEN; s++)
             {
-                float phase = (float)s / WAVE_LEN;
-                float v;
-                switch (archetype)
-                {
-                    case 0:  v = HarmonicSample(phase, row, col); break;
-                    case 1:  v = WavefoldSample(phase, row, col); break;
-                    case 2:  v = InharmonicSample(phase, row, col); break;
-                    default: v = FormantSample(phase, row, col);   break;
-                }
-                s_wavetables[baseIdx + s] = v;
-                float av = MathF.Abs(v);
+                float av = MathF.Abs(s_wavetables[baseIdx + s]);
                 if (av > peak) peak = av;
             }
-
-            // Second pass — normalize to ±1 peak (each cell independently)
             if (peak > 1e-6f)
             {
                 float inv = 1f / peak;
@@ -214,39 +227,22 @@ namespace PedalPlaits.Engines
             }
         }
 
-        // Archetype 0/4 — harmonic series with varying tilt.
-        // row → number of partials (1..8)
-        // col → spectral tilt (0 = natural 1/p, 1 = flat — all partials equal)
-        //
-        // v1.1 fix — at row=0 (numPartials=1), the tilt formula degenerates:
-        //   amp = (1/1)·(1-tilt) + (1/1)·tilt = 1
-        // so MORPH has no effect at that one corner. Without intervention
-        // the entire row=0 of bank 0 collapses to a pure sine regardless
-        // of MORPH. Workaround: at row=0, add a phase-distortion term
-        // driven by col so MORPH controls the waveshape (sine → distorted
-        // sine) instead of doing nothing. Other rows are unaffected.
-        static float HarmonicSample(float phase, int row, int col)
+        // Per-cell algorithmic generation. Only called for archetypes 1 and 2
+        // after v1.4 (archetypes 0 and 3 use Plaits-faithful path above).
+        static void GenerateOneCell(int bank, int archetype, int row, int col)
         {
-            int numPartials = 1 + row;
-            float tilt = (float)col / (N_COLS - 1);   // 0..1
+            int baseIdx = CellOffset(bank, row, col);
 
-            if (numPartials == 1)
+            for (int s = 0; s < WAVE_LEN; s++)
             {
-                // Single-partial special case — phase-distorted sine.
-                // tilt=0 → pure sine; tilt=1 → ~40% phase distortion.
-                float dist = tilt * 0.4f;
-                float p = phase + dist * MathF.Sin(2f * MathF.PI * phase);
-                return MathF.Sin(2f * MathF.PI * p);
+                float phase = (float)s / WAVE_LEN;
+                float v = archetype == 1
+                    ? WavefoldSample(phase, row, col)
+                    : InharmonicSample(phase, row, col);
+                s_wavetables[baseIdx + s] = v;
             }
 
-            float sum = 0f;
-            for (int p = 1; p <= numPartials; p++)
-            {
-                float amp = 1f / p;
-                amp = amp * (1f - tilt) + (1f / numPartials) * tilt;  // lerp to flat spectrum
-                sum += amp * MathF.Sin(2f * MathF.PI * p * phase);
-            }
-            return sum;
+            NormalizeCell(baseIdx);
         }
 
         // Archetype 1/5 — sine through wavefolder with asymmetry.
@@ -281,23 +277,8 @@ namespace PedalPlaits.Engines
             return sum;
         }
 
-        // Archetype 3/7 — narrow-band formant peak.
-        // row → centre harmonic of the formant (1..8)
-        // col → bandwidth (1..8 partials wide around the centre)
-        static float FormantSample(float phase, int row, int col)
-        {
-            int peakH = 1 + row;
-            int bandwidth = 1 + col;
-            int loP = Math.Max(1, peakH - bandwidth);
-            int hiP = peakH + bandwidth;
-            float sum = 0f;
-            for (int p = loP; p <= hiP; p++)
-            {
-                float dist = Math.Abs(p - peakH);
-                float amp = MathF.Max(0f, 1f - dist / (bandwidth + 1f));
-                sum += amp * MathF.Sin(2f * MathF.PI * p * phase);
-            }
-            return sum;
-        }
+        // Archetype 3/7 — Plaits bank_2 (formantish), built in
+        // PlaitsWavetables.BuildBank2(). The old narrow-band-formant-peak
+        // algorithmic generator was removed in v1.4.
     }
 }
