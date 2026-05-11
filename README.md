@@ -2,7 +2,9 @@
 
 ReBuzz managed machine — port of Mutable Instruments' Plaits macro-oscillator.
 
-**Status:** v1.0 — 10 engines functional, mono voice, OUT + AUX outputs.
+**Status:** v1.3 — 10 engines, mono voice, OUT + AUX outputs, per-Work
+parameter smoothing (v1.2) + velocity sensitivity routing (v1.3),
+50-preset factory bank.
 
 **Original source:** https://github.com/pichenettes/eurorack/tree/master/plaits
 **License:** MIT (Plaits firmware is MIT-licensed; this port preserves
@@ -26,7 +28,7 @@ the appendix for what was skipped and why.
 
 ## Parameters
 
-### Global
+### Global — core
 
 | Parameter      | Range  | Function |
 |----------------|--------|----------|
@@ -39,12 +41,32 @@ the appendix for what was skipped and why.
 | Decay          | 0–127  | Internal envelope decay time (~5 ms to ~5 s, exponential) |
 | Volume         | 0–127  | Final output level |
 
+All six continuous parameters (Harmonics through Volume) are smoothed
+with a 10 ms time constant — external LFO / envelope-follower /
+MIDI-CC modulation targeting them produces clean continuous changes
+rather than buffer-rate zipper noise. See Core §32 for the design.
+
+### Global — velocity routing
+
+| Parameter      | Range  | Function |
+|----------------|--------|----------|
+| Vel Harmonics  | 0–127  | Velocity sensitivity for Harmonics (64 = no modulation, bipolar) |
+| Vel Timbre     | 0–127  | Velocity sensitivity for Timbre |
+| Vel Morph      | 0–127  | Velocity sensitivity for Morph |
+| Vel Decay      | 0–127  | Velocity sensitivity for Decay |
+
+Each routing depth is bipolar centered at 64. Values above 64 make the
+target brighten/intensify on harder hits; values below 64 invert that
+relationship. Max offset is ±0.5 of the target parameter's range at
+velocity 1.0 with extreme depth. Default 64 = no modulation; pre-v1.3
+patches play identically.
+
 ### Per-track
 
 | Column   | Function |
 |----------|----------|
 | Note     | Pitch (or trigger event on percussive engines) |
-| Velocity | Trigger strength — sets envelope start level |
+| Velocity | Trigger strength — drives envelope start level and any active velocity-routing depths |
 
 ---
 
@@ -180,9 +202,12 @@ ReBuzz Work(IList<Sample[]>, n, mode)
    │
    ├─ sample-rate-change detection (Core §29)
    ├─ transport-stop detection (Core §27)
-   ├─ drain pending Note On / Note Off
+   ├─ drain pending Note On / Note Off  (NoteOn uses raw param values)
+   ├─ compute smoothed-param end-of-buffer values (Core §32)
+   ├─ compute velocity-routing offsets from current Vel* depths
    ├─ for each BLOCK_SIZE (12) chunk:
    │     scratchOut[] = scratchAux[] = 0
+   │     lerp smoothed params, add velocity offsets, clamp to [0,1]
    │     Voice.Render(scratchOut, scratchAux, blk, params)
    │       │
    │       ├─ early-exit when !IsActive  (CPU saving — Core §30 discussion)
@@ -191,7 +216,7 @@ ReBuzz Work(IList<Sample[]>, n, mode)
    │       │     env = DecayEnv.Process(blk)
    │       │     LPG.Process(scratchOut, scratchAux, env, response, decay)
    │       └─ tracks IsActive — pitched: env-based; percussive: IEngine.IsSilent
-   │     copy scratch → output[i..i+blk] with Volume scaling
+   │     copy scratch → output[i..i+blk] with smoothed Volume scaling
    └─ return Voice.IsActive
 ```
 
@@ -287,5 +312,6 @@ not affiliated with or endorsed by Mutable Instruments.
 Core ReBuzz managed-machine findings used by this port are documented in
 the project's `ReBuzz_ManagedMachine_Notes_Core.md` (§27 transport stop,
 §29 sample-rate change, §30 denormal protection, §31 SVF impulse-response
-normalisation) and `_Build.md` (§1.2 mandatory csproj properties,
-§1.3 post-build deploy target, §6 namespace separation).
+normalisation, §32 per-Work parameter smoothing) and `_Build.md`
+(§1.2 mandatory csproj properties, §1.3 post-build deploy target,
+§6 namespace separation).
