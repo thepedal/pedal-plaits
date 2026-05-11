@@ -1,0 +1,105 @@
+// Engines/FmEngine.cs — Plaits engine 2: Two-op FM.
+//
+// Manual:
+//   HARMONICS: frequency ratio (carrier:modulator)
+//   TIMBRE:    modulation index
+//   MORPH:     feedback — op2-self past 12, op1-self before 12
+//                (12 o'clock = no feedback, "clean" 2-op FM)
+//   AUX:       sub-oscillator (carrier at half frequency)
+//
+// v0.1 design choices documented inline. Faithful in spirit to
+// plaits/dsp/engine/fm_engine.cc but written fresh rather than
+// line-by-line ported.
+
+using System;
+using PedalPlaits.Util;
+
+namespace PedalPlaits.Engines
+{
+    public class FmEngine : IEngine
+    {
+        public bool IsPercussive => false;
+
+        float _sr = 44100f;
+        float _baseHz = 220f;
+
+        // Two phase accumulators, normalized 0..1.
+        // Free-running across notes (SH101 §7 convention) — no reset on NoteOn.
+        float _phase1, _phase2;
+
+        // One-sample-delayed outputs for self-feedback paths.
+        float _op1Prev, _op2Prev;
+
+        public void Init(float sr) { _sr = sr; Reset(); }
+
+        public void Reset()
+        {
+            _phase1 = _phase2 = 0f;
+            _op1Prev = _op2Prev = 0f;
+        }
+
+        public void NoteOn(int midiNote, float velocity)
+        {
+            _baseHz = DspUtil.MidiToHz(midiNote);
+            // Don't reset phases — analog-style continuity across notes.
+        }
+
+        public void NoteOff() { /* env handles fade */ }
+
+        public void Render(float[] outBuf, float[] auxBuf, int n, in EngineParams p)
+        {
+            // ── HARMONICS: modulator/carrier frequency ratio ──
+            // Smooth 0.25 .. 16 curve. Useful FM character lives anywhere
+            // here; the user can land on integer ratios by ear. A future
+            // refinement could snap to musically-meaningful ratios
+            // (0.5, 1, 1.5, 2, 3, 4, 5, 7, 11, …) like the original.
+            float ratio = 0.25f + p.Harmonics * 15.75f;
+
+            // ── TIMBRE: modulation index in RADIANS ──
+            // 0 = no FM (pure carrier sine), 6 = aggressive bell-like
+            // sidebands. Standard FM literature uses radian indices.
+            float modIndex = p.Timbre * 6f;
+
+            // ── MORPH: feedback split around 12 o'clock ──
+            // <0.5 → op1 (carrier) self-feedback, "chaotic" character
+            // =0.5 → no feedback, clean 2-op FM
+            // >0.5 → op2 (modulator) self-feedback, "rougher" modulator
+            // Feedback amounts in radians, bounded to π/2 at extremes
+            // for v0.1 to avoid runaway self-modulation.
+            float fb1 = p.Morph < 0.5f ? (0.5f - p.Morph) * MathF.PI : 0f;
+            float fb2 = p.Morph > 0.5f ? (p.Morph - 0.5f) * MathF.PI : 0f;
+
+            float f1  = _baseHz;
+            float f2  = _baseHz * ratio;
+            float dt1 = f1 / _sr;
+            float dt2 = f2 / _sr;
+
+            const float TWO_PI = 2f * MathF.PI;
+            const float OUT_GAIN = 0.5f;   // headroom — strong FM peaks near ±1
+
+            for (int i = 0; i < n; i++)
+            {
+                // Modulator (op2) with optional self-feedback
+                float op2 = MathF.Sin(TWO_PI * _phase2 + fb2 * _op2Prev);
+                _op2Prev = op2;
+
+                // Carrier (op1):  phase + modIndex * modulator + self-fb
+                float op1 = MathF.Sin(
+                    TWO_PI * _phase1
+                    + modIndex * op2
+                    + fb1 * _op1Prev);
+                _op1Prev = op1;
+
+                outBuf[i] += op1 * OUT_GAIN;
+
+                // AUX: sub-oscillator (carrier at half frequency).
+                // Derived directly from _phase1 — no separate accumulator.
+                float sub = MathF.Sin(TWO_PI * (_phase1 * 0.5f));
+                auxBuf[i] += sub * OUT_GAIN;
+
+                _phase1 += dt1; if (_phase1 >= 1f) _phase1 -= 1f;
+                _phase2 += dt2; if (_phase2 >= 1f) _phase2 -= 1f;
+            }
+        }
+    }
+}
