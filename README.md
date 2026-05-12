@@ -2,7 +2,7 @@
 
 ReBuzz managed machine — port of Mutable Instruments' Plaits macro-oscillator.
 
-**Status:** v1.9 — 11 engines, mono voice, OUT + AUX outputs, per-Work
+**Status:** v1.10 — 11 engines, mono voice, OUT + AUX outputs, per-Work
 parameter smoothing (v1.2) + velocity sensitivity routing (v1.3) +
 Plaits-faithful wavetable banks 0/4 and 3/7 + hardsync-formants region
 on engine 0 + vactrol-modeled LPG (v1.4) + AUX faithful rendering for
@@ -11,7 +11,8 @@ engine 0 + scaled-PolyBLEP hardsync AA + LDR non-linearity in vactrol
 wrap-side notched-saw AA (v1.6) + integrated wavetable playback
 (Franck-Valimaki K=1) + entry-side notched-saw AA (v1.7) + FM sideband
 soft-clip AA + two-stage vactrol LPG cascade (v1.8) + Rings-style
-modal resonator engine (v1.9), 50-preset factory bank.
+modal resonator engine (v1.9), 110-preset factory bank organised by
+engine (v1.10).
 
 **Original source:** https://github.com/pichenettes/eurorack/tree/master/plaits
 **License:** MIT (Plaits firmware is MIT-licensed; this port preserves
