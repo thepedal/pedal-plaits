@@ -15,9 +15,9 @@ from DEFAULTS (which mirrors the source's DefValue attributes).
 
 Naming convention (v1.10+):
   "NN Category - Description"  where NN is the zero-padded engine
-  index (00..11). Zero-padding ensures alphabetical sort matches
+  index (00..12). Zero-padding ensures alphabetical sort matches
   engine order in any ReBuzz browser display. 10 presets per engine,
-  120 total (v1.11 added the 10 inharmonic-string presets at slot 11).
+  130 total (v1.12 added the 10 phase-distortion presets at slot 12).
 
 Adding new parameters in future Pedal Plaits versions:
   1. Append new entries at the END of PARAM_INDEX (do not reorder).
@@ -62,7 +62,7 @@ DEFAULTS = {
     "Vel Decay":     64,
 }
 
-# 120 presets, 10 per engine. Names start with the zero-padded engine
+# 130 presets, 10 per engine. Names start with the zero-padded engine
 # index for quick visual grouping in the ReBuzz preset browser.
 # "(AUX)" suffix flags presets where the AUX output is the intended
 # use case rather than OUT.
@@ -223,6 +223,23 @@ PRESETS = {
     "11 Bell - Stretched":      {"Engine": 11, "Harmonics": 85,  "Timbre": 80,  "Morph": 80},
     "11 Glass - Clang":         {"Engine": 11, "Harmonics": 120, "Timbre": 100, "Morph": 70},
     "11 Pluck - Wood (AUX)":    {"Engine": 11, "Harmonics": 30,  "Timbre": 35,  "Morph": 30},
+
+    # ── 12 — Phase distortion / modulation (Casio CZ-style) ──
+    # OUT = hard-sync'd modulator (strict harmonic sidebands), AUX =
+    # free-running modulator (smooth PM, can be inharmonic). HARMONICS
+    # sweeps modulator ratio 0.5×–8× (quadratic), TIMBRE is modulation
+    # depth (soft-clipped to keep peak sidebands below 90 % Nyquist),
+    # MORPH is asymmetry of the in-loop phase break point.
+    "12 Lead - CZ Saw":         {"Engine": 12, "Harmonics": 10,  "Timbre": 50,  "Morph": 20, "LPG Response": 80,  "Decay": 50},
+    "12 Lead - CZ Square":      {"Engine": 12, "Harmonics": 64,  "Timbre": 80,  "Morph": 64, "LPG Response": 100, "Decay": 40},
+    "12 Brass - PM":            {"Engine": 12, "Harmonics": 40,  "Timbre": 64,  "Morph": 64, "LPG Response": 100, "Decay": 40},
+    "12 Bass - Sub":            {"Engine": 12, "Frequency": 30,  "Harmonics": 20,  "Timbre": 70,  "Morph": 40, "LPG Response": 100, "Decay": 40},
+    "12 Bell - Inharm":         {"Engine": 12, "Harmonics": 110, "Timbre": 100, "Morph": 64, "LPG Response": 80,  "Decay": 80},
+    "12 Pluck - DX":            {"Engine": 12, "Harmonics": 64,  "Timbre": 90,  "Morph": 30, "LPG Response": 100, "Decay": 20},
+    "12 Pad - Smooth":          {"Engine": 12, "Harmonics": 20,  "Timbre": 30,  "Morph": 64, "LPG Response": 20,  "Decay": 120},
+    "12 FX - Aggressive":       {"Engine": 12, "Harmonics": 120, "Timbre": 127, "Morph": 110,"LPG Response": 100, "Decay": 70},
+    "12 FX - Inharmonic (AUX)": {"Engine": 12, "Harmonics": 80,  "Timbre": 80,  "Morph": 64, "LPG Response": 100, "Decay": 80},
+    "12 Drone - PD":            {"Engine": 12, "Harmonics": 10,  "Timbre": 40,  "Morph": 64, "LPG Response": 10,  "Decay": 127},
 }
 
 

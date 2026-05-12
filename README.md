@@ -2,7 +2,7 @@
 
 ReBuzz managed machine — port of Mutable Instruments' Plaits macro-oscillator.
 
-**Status:** v1.11 — 12 engines, mono voice, OUT + AUX outputs, per-Work
+**Status:** v1.12 — 13 engines, mono voice, OUT + AUX outputs, per-Work
 parameter smoothing (v1.2) + velocity sensitivity routing (v1.3) +
 Plaits-faithful wavetable banks 0/4 and 3/7 + hardsync-formants region
 on engine 0 + vactrol-modeled LPG (v1.4) + AUX faithful rendering for
@@ -13,7 +13,8 @@ wrap-side notched-saw AA (v1.6) + integrated wavetable playback
 soft-clip AA + two-stage vactrol LPG cascade (v1.8) + Rings-style
 modal resonator engine (v1.9), 110-preset factory bank organised by
 engine (v1.10) + extended Karplus-Strong inharmonic string engine
-(v1.11), 120-preset factory bank.
+(v1.11) + phase distortion / modulation engine (v1.12),
+130-preset factory bank.
 
 **Original source:** https://github.com/pichenettes/eurorack/tree/master/plaits
 **License:** MIT (Plaits firmware is MIT-licensed; this port preserves
@@ -32,7 +33,7 @@ shaping. Each engine also provides an AUX output with a distinct variant
 of the same sound, giving 20 musically-different timbres across the
 engine bank.
 
-The 12 engines covered are a curated subset of Plaits' original 16. See
+The 13 engines covered are a curated subset of Plaits' original 16. See
 the appendix for what was skipped and why.
 
 ## Parameters
@@ -286,6 +287,34 @@ supports 3-voice sympathetic-string polyphony in this engine, but
 Pedal Plaits is mono throughout and a polyphonic re-architecture is
 a v2.0 question.
 
+### 12 — Phase distortion
+
+Casio CZ-style phase distortion combined with phase modulation —
+asymmetric piecewise mapping of the carrier phase before the sine
+lookup, plus a modulator that phase-modulates the result. The two
+outputs demonstrate the same engine under different sync regimes.
+
+- **HARMONICS:** distortion frequency — modulator/carrier ratio
+  swept smoothly from 0.5× to 8× (quadratic mapping for finer
+  control in the musical 1–3× range, opens up to clangorous
+  inharmonic ratios at the top).
+- **TIMBRE:** distortion amount — modulator depth in radians, 0 to
+  2, soft-clipped per buffer with the same analytical sideband bound
+  as the FM engine so peak sidebands stay below 90 % of Nyquist
+  regardless of pitch.
+- **MORPH:** distortion asymmetry — break point of the piecewise
+  phase mapping applied to the carrier. 0.5 = symmetric (smooth
+  sine), extremes = strongly skewed phase advance (saw/reverse-saw
+  character). Mapped to [0.1, 0.9] so the extremes still produce a
+  meaningful waveform.
+- **OUT:** carrier hard-sync'd to the modulator — modulator phase =
+  ratio × carrier_phase mod 1, so sidebands land on exact integer
+  multiples of the carrier. The "phase distortion" half: strict
+  harmonic skirts, classic Casio CZ flavour.
+- **AUX:** carrier and modulator both free-running. The "modulation"
+  half: smooth FM-like sidebands, inharmonic when the ratio isn't an
+  integer.
+
 ---
 
 ## Architecture
@@ -334,6 +363,7 @@ ReBuzz Work(IList<Sample[]>, n, mode)
 | `Engines/HiHatEngine.cs`          | Engine 9 |
 | `Engines/ModalResonatorEngine.cs` | Engine 10 (Rings-style modal resonator, v1.9) |
 | `Engines/InharmonicStringEngine.cs`| Engine 11 (extended Karplus-Strong inharmonic string, v1.11) |
+| `Engines/PhaseDistortionEngine.cs`| Engine 12 (Casio CZ phase distortion + modulation, v1.12) |
 | `Util/PolyBlep.cs`                | PolyBLEP step correction |
 | `Util/DspUtil.cs`                 | MidiToHz, lerp, clamp helpers |
 
@@ -399,8 +429,6 @@ From Plaits' 16 engines, these are deliberately not in this port:
   value in a tracker context relative to porting cost.
 - **String chord (Plaits engine 7)** — PedalChord already covers chord
   generation in the project's ecosystem.
-- **Formant/PD (Plaits engine 4)** — phase-distortion formant synthesis;
-  PedalInvFFT covers related territory differently.
 - **Particle noise (Plaits engine 11)** — character overlaps with the
   filtered noise engine.
 
