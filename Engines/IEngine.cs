@@ -1,4 +1,4 @@
-// Engines/IEngine.cs — common contract for all 10 synthesis engines.
+// Engines/IEngine.cs — common contract for all 11 synthesis engines.
 //
 // Lifecycle:
 //   Init(sr)       — once at machine construction

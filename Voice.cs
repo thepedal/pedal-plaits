@@ -1,7 +1,7 @@
 // Voice.cs — single-voice orchestrator.
 //
 // Owns:
-//   - The 10 engines (constructed up front; switching just changes index)
+//   - The 11 engines (constructed up front; switching just changes index)
 //   - The LPG (low-pass gate, applied to pitched engines)
 //   - The internal decay envelope (drives the LPG strike)
 //
@@ -47,6 +47,7 @@ namespace PedalPlaits
                 new BassDrumEngine(),       // 7
                 new SnareDrumEngine(),      // 8
                 new HiHatEngine(),          // 9
+                new ModalResonatorEngine(), // 10
             };
         }
 

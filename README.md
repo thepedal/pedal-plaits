@@ -2,7 +2,7 @@
 
 ReBuzz managed machine — port of Mutable Instruments' Plaits macro-oscillator.
 
-**Status:** v1.8 — 10 engines, mono voice, OUT + AUX outputs, per-Work
+**Status:** v1.9 — 11 engines, mono voice, OUT + AUX outputs, per-Work
 parameter smoothing (v1.2) + velocity sensitivity routing (v1.3) +
 Plaits-faithful wavetable banks 0/4 and 3/7 + hardsync-formants region
 on engine 0 + vactrol-modeled LPG (v1.4) + AUX faithful rendering for
@@ -10,8 +10,8 @@ engine 0 + scaled-PolyBLEP hardsync AA + LDR non-linearity in vactrol
 (v1.5) + Plaits bank_3 (Braids-derived) for wavetable banks 2/6 +
 wrap-side notched-saw AA (v1.6) + integrated wavetable playback
 (Franck-Valimaki K=1) + entry-side notched-saw AA (v1.7) + FM sideband
-soft-clip AA + two-stage vactrol LPG cascade (v1.8), 50-preset factory
-bank.
+soft-clip AA + two-stage vactrol LPG cascade (v1.8) + Rings-style
+modal resonator engine (v1.9), 50-preset factory bank.
 
 **Original source:** https://github.com/pichenettes/eurorack/tree/master/plaits
 **License:** MIT (Plaits firmware is MIT-licensed; this port preserves
@@ -30,7 +30,7 @@ shaping. Each engine also provides an AUX output with a distinct variant
 of the same sound, giving 20 musically-different timbres across the
 engine bank.
 
-The 10 engines covered are a curated subset of Plaits' original 16. See
+The 11 engines covered are a curated subset of Plaits' original 16. See
 the appendix for what was skipped and why.
 
 ## Parameters
@@ -226,6 +226,31 @@ flavours.
 - **OUT:** 6-square sum + noise → HPF → tanh dirty VCA (808 flavour)
 - **AUX:** 3 ring-modulated square pairs → HPF → clean VCA (707/708 flavour)
 
+### 10 — Modal resonator *(self-enveloped)*
+
+Rings-style modal partial bank — 24 biquad resonators in parallel,
+excited by a Hann-windowed white-noise burst on NoteOn. Plucked
+strings, marimba, bell, glass, gamelan.
+
+- **HARMONICS:** structure — stiffness coefficient B in the modal
+  ratio formula `f_n = n · f_0 · √(1 + B · n²)`. At 0 the partials sit
+  at perfect integer ratios (string-like); the upper half of the knob
+  opens up to bell/marimba/glass spectra. Quadratic mapping so the
+  lower half stays in string-stretch territory.
+- **TIMBRE:** brightness — per-partial decay rolloff. 0 = high partials
+  decay sharply faster than the fundamental (mellow, damped); 127 = all
+  partials share the same decay (bright, even ring).
+- **MORPH:** position / damping — fundamental T60 swept exponentially
+  from ~50 ms (percussive pluck) to ~3 s (long sustained ring).
+- **OUT:** sum of all 24 partials.
+- **AUX:** sum of even-indexed partials only (fundamental + odd
+  harmonics) — hollow, clarinet-like character.
+
+Bypasses the LPG since each partial owns its decay; the global Decay
+parameter is therefore ignored by this engine (MORPH is the decay
+control). Partials whose frequency would exceed 95% of Nyquist are
+deactivated to prevent aliasing at extreme pitches.
+
 ---
 
 ## Architecture
@@ -272,6 +297,7 @@ ReBuzz Work(IList<Sample[]>, n, mode)
 | `Engines/BassDrumEngine.cs`       | Engine 7 (first percussive) |
 | `Engines/SnareDrumEngine.cs`      | Engine 8 (with 1/f tonal normalisation — Core §31) |
 | `Engines/HiHatEngine.cs`          | Engine 9 |
+| `Engines/ModalResonatorEngine.cs` | Engine 10 (Rings-style modal resonator, v1.9) |
 | `Util/PolyBlep.cs`                | PolyBLEP step correction |
 | `Util/DspUtil.cs`                 | MidiToHz, lerp, clamp helpers |
 
@@ -341,9 +367,6 @@ From Plaits' 16 engines, these are deliberately not in this port:
   PedalInvFFT covers related territory differently.
 - **Particle noise (Plaits engine 11)** — character overlaps with the
   filtered noise engine.
-- **Modal/inharmonic string (Plaits engines 12–13)** — Rings-style modal
-  resonator; warrants a separate PedalModal port. PedalInvFFT covers
-  FFT-based partial work already.
 
 The `IEngine` contract supports adding any of these later without
 architectural change.

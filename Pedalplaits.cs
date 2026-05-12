@@ -91,12 +91,13 @@ namespace PedalPlaits
         [ParameterDecl(
             Name = "Engine",
             Description = "Synthesis model",
-            MinValue = 0, MaxValue = 9, DefValue = 0,
+            MinValue = 0, MaxValue = 10, DefValue = 0,
             ValueDescriptions = new[]
             {
                 "Virtual Analog", "Waveshaping", "Two-op FM", "Harmonic",
                 "Wavetable", "Granular Cloud", "Filtered Noise",
                 "Bass Drum", "Snare Drum", "Hi-Hat",
+                "Modal Resonator",
             })]
         public int Engine { get; set; } = 0;
 
