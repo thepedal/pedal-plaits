@@ -2,10 +2,12 @@
 
 ReBuzz managed machine — port of Mutable Instruments' Plaits macro-oscillator.
 
-**Status:** v1.4 — 10 engines, mono voice, OUT + AUX outputs, per-Work
+**Status:** v1.5 — 10 engines, mono voice, OUT + AUX outputs, per-Work
 parameter smoothing (v1.2) + velocity sensitivity routing (v1.3) +
 Plaits-faithful wavetable banks 0/4 and 3/7 + hardsync-formants region
-on engine 0 + vactrol-modeled LPG (v1.4), 50-preset factory bank.
+on engine 0 + vactrol-modeled LPG (v1.4) + AUX faithful rendering for
+engine 0 + scaled-PolyBLEP hardsync AA + LDR non-linearity in vactrol
+(v1.5), 50-preset factory bank.
 
 **Original source:** https://github.com/pichenettes/eurorack/tree/master/plaits
 **License:** MIT (Plaits firmware is MIT-licensed; this port preserves
@@ -81,13 +83,17 @@ three engines; everything else is shared.
 
 Two PolyBLEP oscillators with detune. Analog-style leads, pads, basses.
 
-- **HARMONICS:** detuning between osc 1 and osc 2 — 0 = unison, 127 ≈ semitone
+- **HARMONICS:** detuning between osc 1 and osc 2 — 0 = unison, 127 ≈ semitone.
+  Same parameter also controls the detuning between the two hardsync pairs on AUX.
 - **TIMBRE:** narrow pulse → full square (low half) → hardsync formants (high half).
   Hardsync slave fades in past noon, its frequency rising exponentially from
   1× to 8× master — sweep MORPH-shaped saw against bright formant peak.
-- **MORPH:** osc 1 waveform — triangle → saw → notched saw (Braids' CSAW)
-- **AUX:** ring modulation of osc 1 and osc 2 (v1.5+ TODO: faithful
-  "sum of two hardsync'd waveforms")
+- **MORPH:** osc 1 waveform — triangle → saw → notched saw (Braids' CSAW).
+  Also shapes the two hardsync slaves on AUX through the same triangle/saw/
+  notched-saw vocabulary.
+- **AUX:** sum of two hardsync'd waveforms — two (master, slave) pairs where
+  master B runs at the same detuned frequency as osc 2, each slave at a fixed
+  2× ratio, both MORPH-shaped. Bright twin-sync chorus character.
 
 ### 1 — Waveshaping
 
@@ -277,27 +283,22 @@ and silences MSB3277. Only the `.dll` is deployed.
 - **Wavetable aliasing at very high pitches** (C-7 and above) — no
   mip-mapped table variants. Stay within typical musical ranges for clean
   output.
-- **Engine 0 hardsync** (v1.4) uses a phase-derived slave with PolyBLEP
-  on its own wraps but suppresses the correction for one sample after
-  each master wrap — the master-induced reset has variable discontinuity
-  magnitude that standard PolyBLEP would over-correct. Audible as some
-  high-frequency aliasing at non-integer sync ratios (TIMBRE between
-  the integer-ratio sweet spots) at high pitches. v1.5+ target: scaled
-  PolyBLEP correction at master wrap, or oversampling.
-- **Engine 0 AUX** still ring-mods osc 1 and osc 2. Plaits' actual AUX
-  is "sum of two hardsync'd waveforms" with MORPH controlling slave
-  shape and HARMONICS controlling detuning between the pair. Deferred
-  to a future revision.
+- **Engine 0 hardsync AA** (v1.5) uses a scaled-PolyBLEP correction at
+  post-master-wrap samples, sized to the actual `-2 × frac(syncRatio)`
+  discontinuity. This handles the audible range cleanly, but the
+  notched-saw component of MORPH on both osc 1 and the AUX slaves is
+  still naïve — its rectangular notch has uncorrected discontinuities
+  at the notch edges and at phase wrap. Audible as a slight roughness
+  on the high-MORPH end of the range at high pitches. A v1.6+ target.
 - **Engine 2 (FM)** uses a smooth ratio sweep on HARMONICS rather than
   snapping to musically-useful ratios (0.5, 1, 2, 3, 4, 5, 7, 11…).
   No anti-aliasing on high-modulation-index sidebands either, so very
   high pitches with TIMBRE near maximum may grit slightly.
-- **LPG vactrol modeling** (v1.4) is a first-order asymmetric envelope
-  follower (5 ms attack, 30 ms release) applied to both VCA gain and
-  filter cutoff. The non-linear LDR transfer curve isn't modeled —
-  Plaits adds a power-law mapping that gives a slight "ducking" feel
-  on hard strikes; that subtle behavior is deferred to a future
-  revision.
+- **LPG vactrol modeling** (v1.4 + v1.5) is a first-order asymmetric
+  envelope follower (5 ms attack, 30 ms release) with a power-law LDR
+  transfer curve (exponent 1.4) applied to both VCA gain and filter
+  cutoff. The LDR exponent is a single tunable; a more physically
+  accurate two-stage RC + saturation model is possible but deferred.
 - **Mono only.** Polyphony would require significant per-voice memory
   expansion (wavetable + harmonic engines have large per-voice state).
 
