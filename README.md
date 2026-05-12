@@ -2,7 +2,7 @@
 
 ReBuzz managed machine — port of Mutable Instruments' Plaits macro-oscillator.
 
-**Status:** v1.10 — 11 engines, mono voice, OUT + AUX outputs, per-Work
+**Status:** v1.11 — 12 engines, mono voice, OUT + AUX outputs, per-Work
 parameter smoothing (v1.2) + velocity sensitivity routing (v1.3) +
 Plaits-faithful wavetable banks 0/4 and 3/7 + hardsync-formants region
 on engine 0 + vactrol-modeled LPG (v1.4) + AUX faithful rendering for
@@ -12,7 +12,8 @@ wrap-side notched-saw AA (v1.6) + integrated wavetable playback
 (Franck-Valimaki K=1) + entry-side notched-saw AA (v1.7) + FM sideband
 soft-clip AA + two-stage vactrol LPG cascade (v1.8) + Rings-style
 modal resonator engine (v1.9), 110-preset factory bank organised by
-engine (v1.10).
+engine (v1.10) + extended Karplus-Strong inharmonic string engine
+(v1.11), 120-preset factory bank.
 
 **Original source:** https://github.com/pichenettes/eurorack/tree/master/plaits
 **License:** MIT (Plaits firmware is MIT-licensed; this port preserves
@@ -31,7 +32,7 @@ shaping. Each engine also provides an AUX output with a distinct variant
 of the same sound, giving 20 musically-different timbres across the
 engine bank.
 
-The 11 engines covered are a curated subset of Plaits' original 16. See
+The 12 engines covered are a curated subset of Plaits' original 16. See
 the appendix for what was skipped and why.
 
 ## Parameters
@@ -252,6 +253,39 @@ parameter is therefore ignored by this engine (MORPH is the decay
 control). Partials whose frequency would exceed 95% of Nyquist are
 deactivated to prevent aliasing at extreme pitches.
 
+### 11 — Inharmonic string *(self-enveloped)*
+
+Rings-style extended Karplus-Strong — single delay-loop string model
+with in-loop stiffness for inharmonicity. Plucks, mallet hits, bowed
+strings, glass/metal/bell territory depending on stiffness. The
+pitched companion to the modal engine: where modal gives discrete
+bell-like resonances, this gives continuous string-like ringing.
+
+- **HARMONICS:** structure — stiffness coefficient of an in-loop
+  allpass that pushes higher partials sharp. 0 = perfectly harmonic
+  (clean nylon/steel string); upper half opens up to piano-stretch
+  through clangorous bell territory at the top. Quadratic mapping for
+  finer low-end control.
+- **TIMBRE:** excitation brightness — cutoff of a one-pole LP on the
+  noise-burst exciter. 0 = mellow wooden pluck; 127 = sharp percussive
+  attack.
+- **MORPH:** decay time — pitch-independent T60 swept exponentially
+  from ~50 ms (heavily damped pluck) to ~5 s (long sustained ring).
+  Feedback gain is recomputed per buffer from `L = sr / freq` so
+  decay length is consistent across the keyboard.
+- **OUT:** the sustained ringing string.
+- **AUX:** raw exciter signal — the windowed noise burst before it
+  enters the loop. Brief percussive texture for layering against the
+  OUT's sustain.
+
+Same self-envelope handling as the modal engine: bypasses the LPG,
+ignores the global Decay parameter, reports IsSilent when both the
+exciter burst is done and the loop's peak amplitude drops below
+threshold so the voice can free CPU. Single voice — Plaits' module
+supports 3-voice sympathetic-string polyphony in this engine, but
+Pedal Plaits is mono throughout and a polyphonic re-architecture is
+a v2.0 question.
+
 ---
 
 ## Architecture
@@ -299,6 +333,7 @@ ReBuzz Work(IList<Sample[]>, n, mode)
 | `Engines/SnareDrumEngine.cs`      | Engine 8 (with 1/f tonal normalisation — Core §31) |
 | `Engines/HiHatEngine.cs`          | Engine 9 |
 | `Engines/ModalResonatorEngine.cs` | Engine 10 (Rings-style modal resonator, v1.9) |
+| `Engines/InharmonicStringEngine.cs`| Engine 11 (extended Karplus-Strong inharmonic string, v1.11) |
 | `Util/PolyBlep.cs`                | PolyBLEP step correction |
 | `Util/DspUtil.cs`                 | MidiToHz, lerp, clamp helpers |
 

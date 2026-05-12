@@ -35,15 +35,29 @@
     <EmbeddedResource Include="Resources\waves.bin" />
   </ItemGroup>
 
+  <!-- Preset bundle, deployed alongside the DLL after build. Declared as
+       an ItemGroup item rather than an inline SourceFiles literal so the
+       space in the filename round-trips cleanly through MSBuild — literal
+       attribute paths with embedded spaces can produce silent Copy failures
+       on some MSBuild configurations. -->
+  <ItemGroup>
+    <PresetBundle Include="Pedal Plaits_Presets.prs.xml" />
+  </ItemGroup>
+
   <!-- Deploy to ReBuzz after every build. Generators live in Gear\Generators.
        ContinueOnError swallows the (expected) lock when ReBuzz is running with
-       the DLL loaded — close ReBuzz and rebuild to refresh.
-       Preset bundle (.prs.xml) deploys alongside the DLL per Build §3. -->
+       the DLL loaded — close ReBuzz and rebuild to refresh the deployed DLL
+       and preset bundle. The Message lines surface in normal-verbosity build
+       output so a failed deploy is visibly noted rather than entirely silent. -->
   <Target Name="DeployToReBuzz" AfterTargets="Build">
+    <Message Text="Deploying $(TargetFileName) → C:\Program Files\ReBuzz\Gear\Generators\"
+             Importance="high" />
     <Copy SourceFiles="$(TargetPath)"
           DestinationFolder="C:\Program Files\ReBuzz\Gear\Generators\"
           ContinueOnError="true" />
-    <Copy SourceFiles="$(ProjectDir)Pedal Plaits_Presets.prs.xml"
+    <Message Text="Deploying @(PresetBundle) → C:\Program Files\ReBuzz\Gear\Generators\"
+             Importance="high" />
+    <Copy SourceFiles="@(PresetBundle)"
           DestinationFolder="C:\Program Files\ReBuzz\Gear\Generators\"
           ContinueOnError="true" />
   </Target>

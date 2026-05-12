@@ -2200,4 +2200,204 @@
       <Comment></Comment>
     </Preset>
   </Item>
+  <Item Key="11 Pluck - Nylon">
+    <Preset Machine="Pedal Plaits">
+      <Parameters>
+        <Parameter Name="Engine" Group="1" Index="0" Track="0" Value="11" />
+        <Parameter Name="Frequency" Group="1" Index="1" Track="0" Value="48" />
+        <Parameter Name="Harmonics" Group="1" Index="2" Track="0" Value="10" />
+        <Parameter Name="Timbre" Group="1" Index="3" Track="0" Value="40" />
+        <Parameter Name="Morph" Group="1" Index="4" Track="0" Value="50" />
+        <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
+        <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
+        <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
+      </Parameters>
+      <Attributes />
+      <Comment></Comment>
+    </Preset>
+  </Item>
+  <Item Key="11 Pluck - Steel">
+    <Preset Machine="Pedal Plaits">
+      <Parameters>
+        <Parameter Name="Engine" Group="1" Index="0" Track="0" Value="11" />
+        <Parameter Name="Frequency" Group="1" Index="1" Track="0" Value="48" />
+        <Parameter Name="Harmonics" Group="1" Index="2" Track="0" Value="10" />
+        <Parameter Name="Timbre" Group="1" Index="3" Track="0" Value="95" />
+        <Parameter Name="Morph" Group="1" Index="4" Track="0" Value="55" />
+        <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
+        <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
+        <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
+      </Parameters>
+      <Attributes />
+      <Comment></Comment>
+    </Preset>
+  </Item>
+  <Item Key="11 Pluck - Mandolin">
+    <Preset Machine="Pedal Plaits">
+      <Parameters>
+        <Parameter Name="Engine" Group="1" Index="0" Track="0" Value="11" />
+        <Parameter Name="Frequency" Group="1" Index="1" Track="0" Value="48" />
+        <Parameter Name="Harmonics" Group="1" Index="2" Track="0" Value="20" />
+        <Parameter Name="Timbre" Group="1" Index="3" Track="0" Value="110" />
+        <Parameter Name="Morph" Group="1" Index="4" Track="0" Value="25" />
+        <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
+        <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
+        <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
+      </Parameters>
+      <Attributes />
+      <Comment></Comment>
+    </Preset>
+  </Item>
+  <Item Key="11 Pluck - Harp">
+    <Preset Machine="Pedal Plaits">
+      <Parameters>
+        <Parameter Name="Engine" Group="1" Index="0" Track="0" Value="11" />
+        <Parameter Name="Frequency" Group="1" Index="1" Track="0" Value="48" />
+        <Parameter Name="Harmonics" Group="1" Index="2" Track="0" Value="5" />
+        <Parameter Name="Timbre" Group="1" Index="3" Track="0" Value="60" />
+        <Parameter Name="Morph" Group="1" Index="4" Track="0" Value="85" />
+        <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
+        <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
+        <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
+      </Parameters>
+      <Attributes />
+      <Comment></Comment>
+    </Preset>
+  </Item>
+  <Item Key="11 Pluck - Piano">
+    <Preset Machine="Pedal Plaits">
+      <Parameters>
+        <Parameter Name="Engine" Group="1" Index="0" Track="0" Value="11" />
+        <Parameter Name="Frequency" Group="1" Index="1" Track="0" Value="48" />
+        <Parameter Name="Harmonics" Group="1" Index="2" Track="0" Value="40" />
+        <Parameter Name="Timbre" Group="1" Index="3" Track="0" Value="70" />
+        <Parameter Name="Morph" Group="1" Index="4" Track="0" Value="65" />
+        <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
+        <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
+        <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
+      </Parameters>
+      <Attributes />
+      <Comment></Comment>
+    </Preset>
+  </Item>
+  <Item Key="11 Bow - Long">
+    <Preset Machine="Pedal Plaits">
+      <Parameters>
+        <Parameter Name="Engine" Group="1" Index="0" Track="0" Value="11" />
+        <Parameter Name="Frequency" Group="1" Index="1" Track="0" Value="48" />
+        <Parameter Name="Harmonics" Group="1" Index="2" Track="0" Value="15" />
+        <Parameter Name="Timbre" Group="1" Index="3" Track="0" Value="30" />
+        <Parameter Name="Morph" Group="1" Index="4" Track="0" Value="127" />
+        <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
+        <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
+        <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
+      </Parameters>
+      <Attributes />
+      <Comment></Comment>
+    </Preset>
+  </Item>
+  <Item Key="11 Drone - Sympathetic">
+    <Preset Machine="Pedal Plaits">
+      <Parameters>
+        <Parameter Name="Engine" Group="1" Index="0" Track="0" Value="11" />
+        <Parameter Name="Frequency" Group="1" Index="1" Track="0" Value="48" />
+        <Parameter Name="Harmonics" Group="1" Index="2" Track="0" Value="25" />
+        <Parameter Name="Timbre" Group="1" Index="3" Track="0" Value="70" />
+        <Parameter Name="Morph" Group="1" Index="4" Track="0" Value="120" />
+        <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
+        <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
+        <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
+      </Parameters>
+      <Attributes />
+      <Comment></Comment>
+    </Preset>
+  </Item>
+  <Item Key="11 Bell - Stretched">
+    <Preset Machine="Pedal Plaits">
+      <Parameters>
+        <Parameter Name="Engine" Group="1" Index="0" Track="0" Value="11" />
+        <Parameter Name="Frequency" Group="1" Index="1" Track="0" Value="48" />
+        <Parameter Name="Harmonics" Group="1" Index="2" Track="0" Value="85" />
+        <Parameter Name="Timbre" Group="1" Index="3" Track="0" Value="80" />
+        <Parameter Name="Morph" Group="1" Index="4" Track="0" Value="80" />
+        <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
+        <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
+        <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
+      </Parameters>
+      <Attributes />
+      <Comment></Comment>
+    </Preset>
+  </Item>
+  <Item Key="11 Glass - Clang">
+    <Preset Machine="Pedal Plaits">
+      <Parameters>
+        <Parameter Name="Engine" Group="1" Index="0" Track="0" Value="11" />
+        <Parameter Name="Frequency" Group="1" Index="1" Track="0" Value="48" />
+        <Parameter Name="Harmonics" Group="1" Index="2" Track="0" Value="120" />
+        <Parameter Name="Timbre" Group="1" Index="3" Track="0" Value="100" />
+        <Parameter Name="Morph" Group="1" Index="4" Track="0" Value="70" />
+        <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
+        <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
+        <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
+      </Parameters>
+      <Attributes />
+      <Comment></Comment>
+    </Preset>
+  </Item>
+  <Item Key="11 Pluck - Wood (AUX)">
+    <Preset Machine="Pedal Plaits">
+      <Parameters>
+        <Parameter Name="Engine" Group="1" Index="0" Track="0" Value="11" />
+        <Parameter Name="Frequency" Group="1" Index="1" Track="0" Value="48" />
+        <Parameter Name="Harmonics" Group="1" Index="2" Track="0" Value="30" />
+        <Parameter Name="Timbre" Group="1" Index="3" Track="0" Value="35" />
+        <Parameter Name="Morph" Group="1" Index="4" Track="0" Value="30" />
+        <Parameter Name="LPG Response" Group="1" Index="5" Track="0" Value="0" />
+        <Parameter Name="Decay" Group="1" Index="6" Track="0" Value="32" />
+        <Parameter Name="Volume" Group="1" Index="7" Track="0" Value="100" />
+        <Parameter Name="Vel Harmonics" Group="1" Index="8" Track="0" Value="64" />
+        <Parameter Name="Vel Timbre" Group="1" Index="9" Track="0" Value="64" />
+        <Parameter Name="Vel Morph" Group="1" Index="10" Track="0" Value="64" />
+        <Parameter Name="Vel Decay" Group="1" Index="11" Track="0" Value="64" />
+      </Parameters>
+      <Attributes />
+      <Comment></Comment>
+    </Preset>
+  </Item>
 </PresetDictionary>

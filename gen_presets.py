@@ -13,11 +13,11 @@ Sparse-override pattern per Build §3.4 — each preset is a dict of
 name->value overrides; any parameter not mentioned takes the value
 from DEFAULTS (which mirrors the source's DefValue attributes).
 
-Naming convention (v1.10):
+Naming convention (v1.10+):
   "NN Category - Description"  where NN is the zero-padded engine
-  index (00..10). Zero-padding ensures alphabetical sort matches
+  index (00..11). Zero-padding ensures alphabetical sort matches
   engine order in any ReBuzz browser display. 10 presets per engine,
-  110 total.
+  120 total (v1.11 added the 10 inharmonic-string presets at slot 11).
 
 Adding new parameters in future Pedal Plaits versions:
   1. Append new entries at the END of PARAM_INDEX (do not reorder).
@@ -62,15 +62,15 @@ DEFAULTS = {
     "Vel Decay":     64,
 }
 
-# 110 presets, 10 per engine. Names start with the zero-padded engine
+# 120 presets, 10 per engine. Names start with the zero-padded engine
 # index for quick visual grouping in the ReBuzz preset browser.
 # "(AUX)" suffix flags presets where the AUX output is the intended
 # use case rather than OUT.
 #
 # Percussive engines (7-9) ignore LPG Response and Decay — they don't
-# appear in those presets' overrides. Engine 10 (modal) similarly
-# ignores both since each partial owns its decay; MORPH is its decay
-# control.
+# appear in those presets' overrides. Engines 10 (modal) and 11
+# (inharmonic string) similarly ignore both since each owns its decay;
+# MORPH is the decay control for those.
 PRESETS = {
     # ── 00 — Virtual Analog ──
     "00 Lead - Saw":            {"Engine": 0, "Harmonics": 30,  "Morph": 90,  "LPG Response": 80,  "Decay": 60},
@@ -207,6 +207,22 @@ PRESETS = {
     "10 Pad - Wash":            {"Engine": 10, "Harmonics": 40,  "Timbre": 100, "Morph": 115},
     "10 Drone - Sustained":     {"Engine": 10, "Harmonics": 10,  "Timbre": 127, "Morph": 127},
     "10 FX - Clang":            {"Engine": 10, "Harmonics": 127, "Timbre": 80,  "Morph": 70},
+
+    # ── 11 — Inharmonic string (extended Karplus-Strong, self-enveloped) ──
+    # Plaits engine 11 in the original numbering — Rings' RED mode.
+    # LPG and global Decay ignored; MORPH controls decay time. Stiffness
+    # (HARMONICS) sweeps the spectrum from clean harmonic string through
+    # piano-stretch into clangorous bell/glass territory.
+    "11 Pluck - Nylon":         {"Engine": 11, "Harmonics": 10,  "Timbre": 40,  "Morph": 50},
+    "11 Pluck - Steel":         {"Engine": 11, "Harmonics": 10,  "Timbre": 95,  "Morph": 55},
+    "11 Pluck - Mandolin":      {"Engine": 11, "Harmonics": 20,  "Timbre": 110, "Morph": 25},
+    "11 Pluck - Harp":          {"Engine": 11, "Harmonics": 5,   "Timbre": 60,  "Morph": 85},
+    "11 Pluck - Piano":         {"Engine": 11, "Harmonics": 40,  "Timbre": 70,  "Morph": 65},
+    "11 Bow - Long":            {"Engine": 11, "Harmonics": 15,  "Timbre": 30,  "Morph": 127},
+    "11 Drone - Sympathetic":   {"Engine": 11, "Harmonics": 25,  "Timbre": 70,  "Morph": 120},
+    "11 Bell - Stretched":      {"Engine": 11, "Harmonics": 85,  "Timbre": 80,  "Morph": 80},
+    "11 Glass - Clang":         {"Engine": 11, "Harmonics": 120, "Timbre": 100, "Morph": 70},
+    "11 Pluck - Wood (AUX)":    {"Engine": 11, "Harmonics": 30,  "Timbre": 35,  "Morph": 30},
 }
 
 
