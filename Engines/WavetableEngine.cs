@@ -1,4 +1,4 @@
-// Engines/WavetableEngine.cs — Plaits engine 5 (slot 4 in this port).
+// Engines/WavetableEngine.cs — Plaits engine 4 (wavetable).
 //
 // Manual:
 //   HARMONICS: bank selection (4 interpolated banks + 4 non-interpolated)
@@ -6,27 +6,35 @@
 //   MORPH:     column index within bank (8 cols, character sweep)
 //   AUX:       low-fi 5-bit quantized output of the same wavetable
 //
-// Architecture: 8 banks × 8 rows × 8 cols × 256 samples = 131k float
-// table values (~512 KB). Stored statically so multiple Pedal Plaits
-// instances share the same wavetable RAM (Core §22).
+// Architecture (v1.7): 8 banks × 8 rows × 8 cols × 132 samples =
+//   67,584 floats (~264 KB) of static storage. Stored as integrated
+//   wavetables — each cell holds the cumulative sum of a 128-sample
+//   normalised waveform, plus 4 padding samples (continuation of the
+//   cumsum into the next period) for clean cross-wrap interpolation.
+//   Single static buffer shared across all Pedal Plaits instances
+//   (Core §22).
 //
-// Banks 0-3: interpolated. TIMBRE/MORPH smoothly cross-fade between
-//   the four corner cells of the (row, col) grid.
-// Banks 4-7: non-interpolated. Stepped behaviour — sweeping TIMBRE
-//   or MORPH jumps from cell to cell. Gives a deliberately digital,
-//   non-musical character.
+// Bank archetypes:
+//   Bank 0/4: Plaits bank_1 (mild additive)
+//   Bank 1/5: algorithmic sine wavefolder with asymmetry
+//   Bank 2/6: Plaits bank_3 (Braids-derived, from embedded waves.bin)
+//             or algorithmic InharmonicSample fallback if waves.bin
+//             missing.
+//   Bank 3/7: Plaits bank_2 (formantish)
+// Banks 0-3 are interpolated across (row, col) for smooth sweeps;
+// banks 4-7 snap to nearest cell for stepped digital character.
 //
-// Bank archetypes (same set repeated, interpolated vs stepped):
-//   Bank 0/4: Harmonic series with varying tilt (row=harmonic count,
-//             col=brightness)
-//   Bank 1/5: Sine through wavefolder (row=fold amount, col=asymmetry)
-//   Bank 2/6: Inharmonic partial sums (row+col seed = ratios picked)
-//   Bank 3/7: Single-peak formant (row=peak position, col=bandwidth)
-//
-// v0.1 generates tables algorithmically rather than shipping a
-// resources binary with the real Plaits wavetable data. The result
-// is *Plaits-like* in shape and behaviour but not bit-identical.
-// Swappable for a Resources.cs binary loader in a future revision.
+// v1.7 — integrated wavetable playback (Franck-Valimaki K=1, linear
+// interp). Storage is cumulative sums; playback computes
+//   y = (I(phase + dt) − I(phase)) / (dt × N)
+// which equals the average of the original waveform over the playback
+// step. The averaging length grows with dt (= freq/sr), naturally
+// rolling off high frequencies that would otherwise alias. At low
+// pitches the response is essentially identical to direct sample
+// playback; at high pitches a 6 dB/oct sinc-style anti-aliasing kicks
+// in. Drops Plaits' native 128-sample geometry into place — same
+// resolution as the original module rather than the v0.1-v1.6
+// 256-sample oversampling, but anti-aliasing more than compensates.
 
 using System;
 using PedalPlaits.Util;
@@ -40,10 +48,17 @@ namespace PedalPlaits.Engines
         const int N_BANKS = 8;
         const int N_ROWS  = 8;
         const int N_COLS  = 8;
-        const int WAVE_LEN = 256;
+
+        // Wave geometry — matches Plaits' native 128-sample tables, plus 4
+        // padding samples per cell so fractional reads at positions
+        // p ∈ [N, N+3) are inside the stored range. Padding holds the
+        // continuation of the cumsum into the next period.
+        const int WAVE_LEN   = 128;
+        const int PAD_LEN    = 4;
+        const int STORAGE_LEN = WAVE_LEN + PAD_LEN;
 
         // Static — built once, shared across all Pedal Plaits instances.
-        // ~512 KB total. Read-only after generation.
+        // 8×8×8×132 × 4 bytes ≈ 264 KB. Read-only after generation.
         static float[] s_wavetables;
         static readonly object s_genLock = new object();
 
@@ -96,6 +111,11 @@ namespace PedalPlaits.Engines
             int colSnap = (int)(colF + 0.5f); if (colSnap >= N_COLS) colSnap = N_COLS - 1;
 
             float dt = _baseHz / _sr;
+            // Step size in table-sample units — used by integrated lookup as
+            // the differencing window. Floor enforces precision for very low
+            // notes (sub-1-table-sample steps would otherwise hit float noise).
+            float stepSamples = MathF.Max(1e-4f, dt * WAVE_LEN);
+            float invStep = 1f / stepSamples;
             const float OUT_GAIN = 0.5f;
 
             for (int i = 0; i < n; i++)
@@ -104,13 +124,11 @@ namespace PedalPlaits.Engines
 
                 if (interpolated)
                 {
-                    // Bilinear interpolation across (row, col) — smooth sweep
-                    sample = SampleBilinear(bank, rowF, colF, _phase);
+                    sample = SampleBilinear(bank, rowF, colF, _phase, stepSamples, invStep);
                 }
                 else
                 {
-                    // Snap to nearest cell — stepped sweep
-                    sample = SampleCell(bank, rowSnap, colSnap, _phase);
+                    sample = SampleCell(bank, rowSnap, colSnap, _phase, stepSamples, invStep);
                 }
 
                 outBuf[i] += sample * OUT_GAIN;
@@ -125,31 +143,57 @@ namespace PedalPlaits.Engines
         }
 
         // ─────────────────────────────────────────────────────────
-        // Wavetable sampling
+        // Integrated wavetable lookup (Franck-Valimaki K=1, linear interp)
+        //
+        // Each cell's storage holds the cumulative sum of a normalised
+        // 128-sample waveform plus 4 padding samples (continuation of the
+        // cumsum). The playback formula
+        //   y = (I(p2) − I(p1)) / stepSamples
+        // computes the mean of the original waveform over the table-sample
+        // interval [p1, p2], which equals direct sample playback at low
+        // pitches and naturally low-passes at high pitches.
+        //
+        // For mean-zero raw waveforms (enforced during generation), the
+        // integrated form is periodic over WAVE_LEN, so positions can be
+        // wrapped modulo WAVE_LEN without disrupting the differencing.
         // ─────────────────────────────────────────────────────────
 
         static int CellOffset(int bank, int row, int col)
-            => ((bank * N_ROWS + row) * N_COLS + col) * WAVE_LEN;
+            => ((bank * N_ROWS + row) * N_COLS + col) * STORAGE_LEN;
 
-        // Read one wavetable cell with linear interpolation between adjacent
-        // samples in the table. phase ∈ [0, 1).
-        float SampleCell(int bank, int row, int col, float phase)
+        // Linearly interpolate I at fractional table-sample position p.
+        // Caller ensures p ∈ [0, WAVE_LEN) — the +1 read uses the
+        // padding samples to stay in-bounds without explicit modulo.
+        static float LerpI(int baseIdx, float p)
         {
-            float fIdx = phase * WAVE_LEN;
-            int   i0   = (int)fIdx;
-            if (i0 >= WAVE_LEN) i0 = WAVE_LEN - 1;
-            int   i1   = (i0 + 1) % WAVE_LEN;
-            float frac = fIdx - i0;
+            int p_int = (int)p;
+            float frac = p - p_int;
+            float a = s_wavetables[baseIdx + p_int];
+            float b = s_wavetables[baseIdx + p_int + 1];
+            return a + (b - a) * frac;
+        }
 
+        // Read one wavetable cell with integrated differencing.
+        // phase ∈ [0, 1), stepSamples = dt × WAVE_LEN (table-sample units),
+        // invStep = 1 / stepSamples (precomputed for performance).
+        static float SampleCell(int bank, int row, int col,
+                                 float phase, float stepSamples, float invStep)
+        {
             int baseIdx = CellOffset(bank, row, col);
-            float s0 = s_wavetables[baseIdx + i0];
-            float s1 = s_wavetables[baseIdx + i1];
-            return s0 + (s1 - s0) * frac;
+
+            float p1 = phase * WAVE_LEN;
+            float p2 = p1 + stepSamples;
+            if (p2 >= WAVE_LEN) p2 -= WAVE_LEN;
+
+            float I1 = LerpI(baseIdx, p1);
+            float I2 = LerpI(baseIdx, p2);
+            return (I2 - I1) * invStep;
         }
 
         // Bilinear interpolation across 4 neighbour cells in the (row, col)
         // grid. Used for banks 0-3 (interpolated mode).
-        float SampleBilinear(int bank, float rowF, float colF, float phase)
+        static float SampleBilinear(int bank, float rowF, float colF,
+                                     float phase, float stepSamples, float invStep)
         {
             int r0 = (int)rowF; if (r0 >= N_ROWS - 1) r0 = N_ROWS - 1;
             int r1 = r0 + 1;    if (r1 >= N_ROWS)     r1 = N_ROWS - 1;
@@ -159,10 +203,10 @@ namespace PedalPlaits.Engines
             int c1 = c0 + 1;    if (c1 >= N_COLS)     c1 = N_COLS - 1;
             float cFrac = colF - c0;
 
-            float s00 = SampleCell(bank, r0, c0, phase);
-            float s01 = SampleCell(bank, r0, c1, phase);
-            float s10 = SampleCell(bank, r1, c0, phase);
-            float s11 = SampleCell(bank, r1, c1, phase);
+            float s00 = SampleCell(bank, r0, c0, phase, stepSamples, invStep);
+            float s01 = SampleCell(bank, r0, c1, phase, stepSamples, invStep);
+            float s10 = SampleCell(bank, r1, c0, phase, stepSamples, invStep);
+            float s11 = SampleCell(bank, r1, c1, phase, stepSamples, invStep);
 
             float sRow0 = s00 + (s01 - s00) * cFrac;
             float sRow1 = s10 + (s11 - s10) * cFrac;
@@ -175,12 +219,8 @@ namespace PedalPlaits.Engines
 
         static void GenerateAllWavetables()
         {
-            s_wavetables = new float[N_BANKS * N_ROWS * N_COLS * WAVE_LEN];
+            s_wavetables = new float[N_BANKS * N_ROWS * N_COLS * STORAGE_LEN];
 
-            // Plaits-faithful waves for archetypes 0, 3, and (when waves.bin
-            // is embedded in the assembly) archetype 2. Built once at first
-            // Init via PlaitsWavetables.BuildBankN().
-            //
             //   Archetype 0 (banks 0/4) — Plaits bank_1 (mild additive)
             //   Archetype 1 (banks 1/5) — algorithmic wavefold
             //   Archetype 2 (banks 2/6) — Plaits bank_3 (Braids-derived)
@@ -192,6 +232,10 @@ namespace PedalPlaits.Engines
             float[][] plaitsBank3 = PlaitsWavetables.BuildBank3(WAVE_LEN);
             Bank3FromBraids = plaitsBank3 != null;
 
+            // Scratch buffer for the raw waveform of each cell, reused
+            // across cells. Heap-allocated once.
+            float[] rawBuf = new float[WAVE_LEN];
+
             for (int bank = 0; bank < N_BANKS; bank++)
             {
                 int archetype = bank % 4;
@@ -199,70 +243,105 @@ namespace PedalPlaits.Engines
                 {
                     for (int col = 0; col < N_COLS; col++)
                     {
-                        int baseIdx = CellOffset(bank, row, col);
+                        // Step 1 — fill rawBuf with this cell's raw waveform
                         if (archetype == 0)
                         {
-                            Array.Copy(plaitsBank1[row * N_COLS + col], 0,
-                                       s_wavetables, baseIdx, WAVE_LEN);
-                            NormalizeCell(baseIdx);
+                            Array.Copy(plaitsBank1[row * N_COLS + col], rawBuf, WAVE_LEN);
                         }
                         else if (archetype == 3)
                         {
-                            Array.Copy(plaitsBank2[row * N_COLS + col], 0,
-                                       s_wavetables, baseIdx, WAVE_LEN);
-                            NormalizeCell(baseIdx);
+                            Array.Copy(plaitsBank2[row * N_COLS + col], rawBuf, WAVE_LEN);
                         }
                         else if (archetype == 2 && plaitsBank3 != null)
                         {
-                            Array.Copy(plaitsBank3[row * N_COLS + col], 0,
-                                       s_wavetables, baseIdx, WAVE_LEN);
-                            NormalizeCell(baseIdx);
+                            Array.Copy(plaitsBank3[row * N_COLS + col], rawBuf, WAVE_LEN);
                         }
                         else
                         {
-                            // Algorithmic fallback for archetypes 1 (wavefold)
-                            // and 2 (inharmonic, when bank_3 unavailable).
-                            GenerateOneCell(bank, archetype, row, col);
+                            FillAlgorithmicRaw(rawBuf, archetype, row, col);
                         }
+
+                        // Step 2 — normalise (DC remove + peak ±1) so the
+                        // integrated form is periodic with bounded magnitude.
+                        NormaliseRaw(rawBuf);
+
+                        // Step 3 — integrate into the storage slot, with
+                        // 4 padding samples extending past the period.
+                        IntegrateIntoStorage(rawBuf, CellOffset(bank, row, col));
                     }
                 }
             }
         }
 
-        // Normalize one wavetable cell to ±1 peak amplitude.
-        static void NormalizeCell(int baseIdx)
+        // Fill `dst` with a raw algorithmic waveform for the given
+        // (archetype, row, col). Used for archetype 1 (wavefold) always,
+        // and archetype 2 (inharmonic) when bank_3 isn't loaded.
+        static void FillAlgorithmicRaw(float[] dst, int archetype, int row, int col)
         {
+            for (int s = 0; s < WAVE_LEN; s++)
+            {
+                float phase = (float)s / WAVE_LEN;
+                dst[s] = archetype == 1
+                    ? WavefoldSample(phase, row, col)
+                    : InharmonicSample(phase, row, col);
+            }
+        }
+
+        // Remove DC (subtract mean) and normalise peak to ±1. Both steps
+        // matter for integrated-wavetable playback: zero-mean keeps the
+        // cumsum periodic; unit peak keeps cells balanced in level.
+        static void NormaliseRaw(float[] buf)
+        {
+            float sum = 0f;
+            for (int s = 0; s < WAVE_LEN; s++) sum += buf[s];
+            float mean = sum / WAVE_LEN;
             float peak = 0f;
             for (int s = 0; s < WAVE_LEN; s++)
             {
-                float av = MathF.Abs(s_wavetables[baseIdx + s]);
+                buf[s] -= mean;
+                float av = MathF.Abs(buf[s]);
                 if (av > peak) peak = av;
             }
             if (peak > 1e-6f)
             {
                 float inv = 1f / peak;
-                for (int s = 0; s < WAVE_LEN; s++)
-                    s_wavetables[baseIdx + s] *= inv;
+                for (int s = 0; s < WAVE_LEN; s++) buf[s] *= inv;
             }
         }
 
-        // Per-cell algorithmic generation. Only called for archetypes 1 and 2
-        // after v1.4 (archetypes 0 and 3 use Plaits-faithful path above).
-        static void GenerateOneCell(int bank, int archetype, int row, int col)
+        // Compute cumulative sum of `raw` (length WAVE_LEN) into s_wavetables
+        // at baseIdx, extending 4 samples past the period (continuation of
+        // the cumsum) for clean cross-wrap interpolation. Final pass DC-
+        // centres the integrated values for float-precision hygiene — the
+        // differencing in playback is invariant to DC shifts of the integral.
+        static void IntegrateIntoStorage(float[] raw, int baseIdx)
         {
-            int baseIdx = CellOffset(bank, row, col);
-
-            for (int s = 0; s < WAVE_LEN; s++)
+            float accum = 0f;
+            for (int i = 0; i < WAVE_LEN; i++)
             {
-                float phase = (float)s / WAVE_LEN;
-                float v = archetype == 1
-                    ? WavefoldSample(phase, row, col)
-                    : InharmonicSample(phase, row, col);
-                s_wavetables[baseIdx + s] = v;
+                s_wavetables[baseIdx + i] = accum;
+                accum += raw[i];
             }
-
-            NormalizeCell(baseIdx);
+            // Padding samples — continue the cumsum past the period.
+            // For zero-mean raw, accum after the loop is ~0 (within rounding),
+            // so padding picks up at I[0]'s value as expected.
+            for (int i = 0; i < PAD_LEN; i++)
+            {
+                s_wavetables[baseIdx + WAVE_LEN + i] = accum;
+                accum += raw[i];
+            }
+            // DC-centre the stored integral
+            float sum = 0f;
+            for (int i = 0; i < STORAGE_LEN; i++) sum += s_wavetables[baseIdx + i];
+            float mean = sum / STORAGE_LEN;
+            for (int i = 0; i < STORAGE_LEN; i++) s_wavetables[baseIdx + i] -= mean;
         }
+
+        // ─────────────────────────────────────────────────────────
+        // Algorithmic wave samplers — used for archetype 1 (always)
+        // and archetype 2 (when bank_3 isn't loaded). Both produce a
+        // sample value in roughly [-1, +1] at a given phase ∈ [0, 1).
+        // ─────────────────────────────────────────────────────────
 
         // Archetype 1/5 — sine through wavefolder with asymmetry.
         // row → fold amount (mild..wild)
@@ -275,7 +354,8 @@ namespace PedalPlaits.Engines
             return MathF.Sin(MathF.PI * sine * foldAmount);
         }
 
-        // Archetype 2/6 — inharmonic partial sum.
+        // Archetype 2/6 — inharmonic partial sum (algorithmic fallback
+        // when Plaits bank_3 isn't available).
         // (row, col) deterministically picks ratios from a fixed set so adjacent
         // cells have audibly related but different timbres.
         static float InharmonicSample(float phase, int row, int col)
@@ -295,9 +375,5 @@ namespace PedalPlaits.Engines
             }
             return sum;
         }
-
-        // Archetype 3/7 — Plaits bank_2 (formantish), built in
-        // PlaitsWavetables.BuildBank2(). The old narrow-band-formant-peak
-        // algorithmic generator was removed in v1.4.
     }
 }

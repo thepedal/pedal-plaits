@@ -2,13 +2,15 @@
 
 ReBuzz managed machine — port of Mutable Instruments' Plaits macro-oscillator.
 
-**Status:** v1.6 — 10 engines, mono voice, OUT + AUX outputs, per-Work
+**Status:** v1.7 — 10 engines, mono voice, OUT + AUX outputs, per-Work
 parameter smoothing (v1.2) + velocity sensitivity routing (v1.3) +
 Plaits-faithful wavetable banks 0/4 and 3/7 + hardsync-formants region
 on engine 0 + vactrol-modeled LPG (v1.4) + AUX faithful rendering for
 engine 0 + scaled-PolyBLEP hardsync AA + LDR non-linearity in vactrol
 (v1.5) + Plaits bank_3 (Braids-derived) for wavetable banks 2/6 +
-wrap-side notched-saw AA (v1.6), 50-preset factory bank.
+wrap-side notched-saw AA (v1.6) + integrated wavetable playback
+(Franck-Valimaki K=1) + entry-side notched-saw AA (v1.7), 50-preset
+factory bank.
 
 **Original source:** https://github.com/pichenettes/eurorack/tree/master/plaits
 **License:** MIT (Plaits firmware is MIT-licensed; this port preserves
@@ -96,6 +98,11 @@ Two PolyBLEP oscillators with detune. Analog-style leads, pads, basses.
   master B runs at the same detuned frequency as osc 2, each slave at a fixed
   2× ratio, both MORPH-shaped. Bright twin-sync chorus character.
 
+Notched-saw discontinuities are anti-aliased on both edges as of v1.7: a
+PolyBLEP at the saw wrap (`phase = 0/1`, inherited from the saw's standard
+correction) plus a phase-shifted PolyBLEP at the notch-entry transition
+(`phase = 1 − notchWidth`, scaled by `wNotch × notchWidth`).
+
 ### 1 — Waveshaping
 
 Asymmetric-triangle → waveshaper → wavefolder chain. Buzzy, gritty,
@@ -127,9 +134,9 @@ organs, bells.
 
 ### 4 — Wavetable
 
-8 banks × 8 × 8 grid of wavetables, generated algorithmically at load
-time and shared statically across machine instances (~512 KB once). A
-navigable 2D map of timbres per bank.
+8 banks × 8 × 8 grid of wavetables, generated at load time and shared
+statically across machine instances (~264 KB once). A navigable 2D map
+of timbres per bank.
 
 - **HARMONICS:** bank selection (discrete jump between banks)
   - 0/4: Plaits bank_1 — mild additive (sines, drawbars, comb, pair, tri/saw stacks)
@@ -144,6 +151,15 @@ navigable 2D map of timbres per bank.
 - **TIMBRE:** row position within bank
 - **MORPH:** column position within bank
 - **AUX:** same waveform quantised to 5-bit values (low-fi crunch)
+
+v1.7 stores each cell as the cumulative sum of a normalised 128-sample
+waveform (Plaits-native size) plus 4 padding samples for cross-wrap
+interpolation. Playback computes `y = (I(φ + dt) − I(φ)) / (dt · N)`,
+which is mathematically the average of the original waveform over the
+playback step. At low pitches the response matches direct sample
+playback; at high pitches the averaging length grows with `dt` and
+naturally low-passes (Franck & Valimaki, *Higher-order integrated
+wavetable synthesis*, DAFX-12; here K=1, linear interpolation).
 
 ### 5 — Granular cloud
 
@@ -283,18 +299,15 @@ and silences MSB3277. Only the `.dll` is deployed.
   functions as the Plaits firmware. Bank_3 requires `Resources/waves.bin`
   to be embedded in the assembly; if the file is missing the engine
   silently falls back to an algorithmic inharmonic bank.
-- **Wavetable aliasing at very high pitches** (C-7 and above) — no
-  mip-mapped table variants. Stay within typical musical ranges for clean
-  output.
 - **Engine 0 hardsync AA** (v1.5) uses a scaled-PolyBLEP correction at
   post-master-wrap samples, sized to the actual `-2 × frac(syncRatio)`
   discontinuity. The MORPH notched-saw component on osc 1 and the AUX
-  slaves gains wrap-side AA in v1.6 (PolyBLEP scaled by `wNotch`); the
-  *entry-side* notch discontinuity (where the saw value jumps to +1 at
-  phase = 1 − notchWidth) remains uncorrected since it sits mid-cycle
-  and needs an arbitrary-position PolyBLEP rather than the standard
-  wrap-edge form. Audible mainly at MORPH near maximum where the
-  notchWidth and jump magnitude are largest. A v1.7+ target.
+  slaves gains wrap-side AA in v1.6 and entry-side AA in v1.7, so both
+  notch discontinuities are now corrected. Residual aliasing at very
+  high pitches with extreme MORPH/HARMONICS comes from the AUX
+  hardsync interaction with the notched waveform shape, which is
+  inherently rich and would benefit from oversampling on extreme
+  patches rather than additional BLEP terms.
 - **Engine 2 (FM)** uses a smooth ratio sweep on HARMONICS rather than
   snapping to musically-useful ratios (0.5, 1, 2, 3, 4, 5, 7, 11…).
   No anti-aliasing on high-modulation-index sidebands either, so very

@@ -203,13 +203,19 @@ namespace PedalPlaits.Engines
         // value at a given phase position. Shared by osc 1 and the
         // AUX hardsync slaves so both follow the same MORPH vocabulary.
         //
-        // v1.6: wrap-side notch AA. The notched component holds a flat
-        // +1 in the region phase > 1-notchWidth, then drops to the post-
-        // wrap saw value (~-1) when phase wraps. The non-notch region
-        // already inherits PolyBLEP correctly through sawValue's weight.
-        // The notch region's +1→saw transition gets an extra PolyBLEP
-        // term scaled by wNotch. (The notch's *entry*-side transition
-        // at phase = 1-notchWidth is still uncorrected — see README.)
+        // Notch anti-aliasing:
+        //   v1.6 — wrap-side AA. The notched component holds a flat +1 in
+        //   the region phase > 1-notchWidth, then drops to the post-wrap
+        //   saw value (~-1) when phase wraps. The non-notch region already
+        //   inherits PolyBLEP correctly through sawValue's weight. The
+        //   notch region's +1→saw transition gets an extra PolyBLEP term
+        //   scaled by wNotch.
+        //   v1.7 — entry-side AA. The notched component jumps from saw
+        //   value (= 1 − 2·notchWidth) up to +1 at phase = 1 − notchWidth,
+        //   magnitude +2·notchWidth weighted by wNotch. Apply a phase-
+        //   shifted PolyBLEP centred at that disc position — equivalent
+        //   to rotating the standard wrap-edge polynomial so its "wrap"
+        //   coincides with the notch entry rather than phase=1.
         static float MorphShape(float sawValue, float phase, float dt,
                                  float wTri, float wSaw, float wNotch,
                                  float notchWidth)
@@ -218,10 +224,25 @@ namespace PedalPlaits.Engines
             bool inNotch = notchWidth > 0f && phase > 1f - notchWidth;
             float notched = inNotch ? 1f : sawValue;
             float morph = wTri * tri + wSaw * sawValue + wNotch * notched;
+
+            // Wrap-side notch AA (v1.6) — fires only inside the notch region
             if (inNotch)
             {
                 morph -= wNotch * PolyBlep.Compute(phase, dt);
             }
+
+            // Entry-side notch AA (v1.7) — fires near phase = 1 − notchWidth
+            // where the notched component jumps from saw to +1 by an amount
+            // 2·notchWidth. The PolyBLEP polynomial smooths a -2 saw jump
+            // when subtracted, so for a +J jump we instead ADD (J/2 × polyBlep);
+            // here J = 2·notchWidth so the scale is notchWidth.
+            if (notchWidth > 0f)
+            {
+                float effectivePhase = phase - (1f - notchWidth);
+                if (effectivePhase < 0f) effectivePhase += 1f;
+                morph += wNotch * notchWidth * PolyBlep.Compute(effectivePhase, dt);
+            }
+
             return morph;
         }
     }
