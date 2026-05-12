@@ -62,6 +62,10 @@ namespace PedalPlaits
         // modulation, slow enough to remove buffer-rate stepping artefacts.
         const float SMOOTH_SECS = 0.010f;
 
+        // One-time flag — set after the first DCWriteLine status line about
+        // the wavetable engine's bank_3 source (Plaits waves.bin vs algorithmic).
+        bool _bankStatusLogged;
+
         // Block-scratch buffers (allocated once, reused — no audio-thread allocation)
         readonly float[] _scratchOut = new float[BLOCK_SIZE];
         readonly float[] _scratchAux = new float[BLOCK_SIZE];
@@ -211,6 +215,25 @@ namespace PedalPlaits
             {
                 _voice.Init(currentSr);
                 _lastSr = currentSr;
+            }
+
+            // One-time status line confirming whether engine 4's bank_3
+            // came from the embedded Plaits waves.bin (Braids waveforms)
+            // or fell back to the algorithmic inharmonic generator.
+            // Voice.Init triggers WavetableEngine's static init the first
+            // time it runs, so this line is correct after the block above.
+            if (!_bankStatusLogged)
+            {
+                string source = WavetableEngine.Bank3FromBraids
+                    ? "Plaits waves.bin (Braids-derived)"
+                    : "algorithmic fallback (waves.bin not loaded)";
+                try
+                {
+                    _host?.Machine?.Graph?.Buzz?.DCWriteLine(
+                        "[Pedal Plaits] Wavetable engine bank 3 source: " + source);
+                }
+                catch { /* never break audio on a logging failure */ }
+                _bankStatusLogged = true;
             }
 
             // Transport-stop edge detection (Core §27) — force-fade voices on

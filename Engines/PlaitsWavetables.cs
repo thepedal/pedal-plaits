@@ -309,6 +309,187 @@ namespace PedalPlaits.Engines
         }
 
         // ─────────────────────────────────────────────────────────
+        // Braids-derived bank_3 support (v1.6).
+        //
+        // wavetables.py's make_braids_family() reads waves.bin (256 waves
+        // × 129-byte stride, uint8) and for each requested index either:
+        //   - fix=True (default): FFT → keep magnitudes, zero phases to
+        //     -π/2 → IFFT. Produces a sine-coherent waveform where every
+        //     frequency component appears as a pure sine, regardless of
+        //     where the original was sampled in its cycle.
+        //   - fix=False: pass through unchanged (modulo signed conversion).
+        //
+        // Port strategy: rather than implement a full FFT/IFFT pair, we
+        // compute spectral magnitudes via DFT (only need 63 bins for a
+        // 128-point input) then synthesize the output as a sum of sines.
+        // This is mathematically equivalent to the FFT-magnitude-IFFT
+        // pipeline when phases are all -π/2 (which gives pure sines), and
+        // skips the inverse-transform entirely.
+        //
+        // Cost analysis: 48 fix=True waves × ~128² DFT + 128² sine
+        // synthesis ≈ 1.5 M MathF.Cos/Sin per startup. ~30 ms on a modern
+        // CPU; runs once when engine 4 first initialises.
+        // ─────────────────────────────────────────────────────────
+
+        static byte[] s_braidsWaves;     // lazy-loaded from embedded resource
+        static bool s_braidsLoadAttempted;
+
+        // Load waves.bin embedded as a resource in the assembly. Returns
+        // null if the resource is missing — caller should fall back to
+        // algorithmic generation in that case.
+        static byte[] LoadBraidsWaves()
+        {
+            if (s_braidsLoadAttempted) return s_braidsWaves;
+            s_braidsLoadAttempted = true;
+
+            var asm = typeof(PlaitsWavetables).Assembly;
+            // Try canonical name first, then any resource ending in waves.bin
+            // (insulates against RootNamespace changes).
+            System.IO.Stream stream = asm.GetManifestResourceStream("PedalPlaits.Resources.waves.bin");
+            if (stream == null)
+            {
+                foreach (var name in asm.GetManifestResourceNames())
+                {
+                    if (name.EndsWith("waves.bin", StringComparison.Ordinal))
+                    {
+                        stream = asm.GetManifestResourceStream(name);
+                        break;
+                    }
+                }
+            }
+            if (stream == null) return null;
+
+            try
+            {
+                var data = new byte[stream.Length];
+                int offset = 0;
+                while (offset < data.Length)
+                {
+                    int read = stream.Read(data, offset, data.Length - offset);
+                    if (read <= 0) break;
+                    offset += read;
+                }
+                s_braidsWaves = data;
+                return data;
+            }
+            finally
+            {
+                stream.Dispose();
+            }
+        }
+
+        // make_braids_family with fix=True. Extract 128 bytes for wave
+        // `index`, compute spectral magnitudes via DFT, synthesize a sum
+        // of sines of those magnitudes. Resamples to the engine's wave
+        // length (typically 256) via linear interpolation.
+        static float[] BraidsFamilyFix(byte[] waves, int index, int outLen)
+        {
+            const int N = 128;
+            int start = index * 129;
+
+            // Signed input (subtract 128 from uint8 byte values)
+            var x = new float[N];
+            for (int i = 0; i < N; i++) x[i] = waves[start + i] - 128f;
+
+            // Spectral magnitudes via DFT — bins 1..N/2-1 only
+            // (DC and Nyquist are dropped because phase-zeroing them
+            // produces zero contribution to the real output).
+            const int K = N / 2;     // 64 — Nyquist bin index
+            var mags = new float[K]; // index k - 1 holds |X[k]| for k=1..K-1
+            for (int k = 1; k < K; k++)
+            {
+                float re = 0f, im = 0f;
+                float kOmega = 2f * MathF.PI * k / N;
+                for (int nn = 0; nn < N; nn++)
+                {
+                    re += x[nn] * MathF.Cos(kOmega * nn);
+                    im -= x[nn] * MathF.Sin(kOmega * nn);
+                }
+                mags[k - 1] = MathF.Sqrt(re * re + im * im);
+            }
+
+            // Synthesize: y[n] = (2/N) × Σ_k |X[k]| × sin(2π k n / N)
+            // (factor of 2 comes from collapsing positive+negative frequency
+            // contributions for real signals.)
+            var yShort = new float[N];
+            float twoPiOverN = 2f * MathF.PI / N;
+            for (int nn = 0; nn < N; nn++)
+            {
+                float sum = 0f;
+                for (int k = 1; k < K; k++)
+                {
+                    sum += mags[k - 1] * MathF.Sin(twoPiOverN * k * nn);
+                }
+                yShort[nn] = 2f * sum / N;
+            }
+
+            return ResampleLinear(yShort, N, outLen);
+        }
+
+        // make_braids_family with fix=False. No spectral processing —
+        // just signed byte conversion and resample.
+        static float[] BraidsFamilyNoFix(byte[] waves, int index, int outLen)
+        {
+            const int N = 128;
+            int start = index * 129;
+            var yShort = new float[N];
+            for (int i = 0; i < N; i++) yShort[i] = waves[start + i] - 128f;
+            return ResampleLinear(yShort, N, outLen);
+        }
+
+        // Linear-interp resample from srcLen samples to dstLen samples.
+        // Wraps cyclically — appropriate for periodic wavetables.
+        static float[] ResampleLinear(float[] src, int srcLen, int dstLen)
+        {
+            var dst = new float[dstLen];
+            for (int i = 0; i < dstLen; i++)
+            {
+                float srcIdx = (float)i * srcLen / dstLen;
+                int idx0 = (int)srcIdx;
+                int idx1 = (idx0 + 1) % srcLen;
+                float frac = srcIdx - idx0;
+                dst[i] = src[idx0] + (src[idx1] - src[idx0]) * frac;
+            }
+            return dst;
+        }
+
+        // ─────────────────────────────────────────────────────────
+        // BuildBank3 — Plaits' bank_3 (shruthi/ambika/braids-derived).
+        // Returns 64 waves at outLen samples each, mirroring the index
+        // tables from wavetables.py. Returns null if waves.bin couldn't
+        // be loaded — caller falls back to algorithmic generation.
+        // ─────────────────────────────────────────────────────────
+        public static float[][] BuildBank3(int outLen)
+        {
+            var waves = LoadBraidsWaves();
+            if (waves == null || waves.Length < 256 * 129) return null;
+
+            // Row indices into waves.bin per wavetables.py bank_3 definition.
+            int[][] fixedRows = {
+                new[] { 0, 2, 4, 6, 8, 10, 12, 14 },                       // Male
+                new[] { 32, 34, 36, 38, 40, 42, 44, 46 },                  // Choir
+                new[] { 176, 189, 191, 193, 195, 197, 199, 201 },          // Digi
+                new[] { 203, 204, 205, 206, 207, 208, 209, 211 },          // Drone
+                new[] { 220, 222, 224, 226, 228, 230, 232, 234 },          // Metal
+                new[] { 236, 238, 240, 242, 244, 246, 248, 250 },          // Fant
+            };
+            int[][] passthroughRows = {
+                new[] { 172, 173, 174, 175, 176, 177, 178, 179 },          // pass A
+                new[] { 180, 181, 182, 183, 184, 185, 186, 187 },          // pass B
+            };
+
+            var result = new float[64][];
+            int idx = 0;
+            foreach (var row in fixedRows)
+                foreach (var i in row)
+                    result[idx++] = BraidsFamilyFix(waves, i, outLen);
+            foreach (var row in passthroughRows)
+                foreach (var i in row)
+                    result[idx++] = BraidsFamilyNoFix(waves, i, outLen);
+            return result;
+        }
+
+        // ─────────────────────────────────────────────────────────
         // Bank builders — exact reproductions of bank_1 and bank_2
         // from wavetables.py, with rows = families and cols = parameter
         // values within each family. Returns 64 waves of length n each.

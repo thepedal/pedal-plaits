@@ -109,7 +109,7 @@ namespace PedalPlaits.Engines
                 // ── OSC 1 — variable saw (MORPH-shaped) ──
                 float saw1Naive = 2f * _phase1 - 1f;
                 float saw1 = saw1Naive - PolyBlep.Compute(_phase1, dt1);
-                float morph1 = MorphShape(saw1, _phase1, morphTri, morphSaw, morphNotch, notchWidth);
+                float morph1 = MorphShape(saw1, _phase1, dt1, morphTri, morphSaw, morphNotch, notchWidth);
 
                 // ── OSC 2 — variable square (TIMBRE-shaped) ──
                 float pulse2 = (_phase2 < pwm) ? 1f : -1f;
@@ -132,13 +132,13 @@ namespace PedalPlaits.Engines
                 // Pair A: master = _phase1, slave at 2× master
                 float syncSaw_aux_a = HardsyncSaw(_phase1, syncRatio_aux, dtSync_aux_a,
                                                    0f, _master1WrappedLastStep);
-                float morphAuxA = MorphShape(syncSaw_aux_a, FracMul(_phase1, syncRatio_aux),
+                float morphAuxA = MorphShape(syncSaw_aux_a, FracMul(_phase1, syncRatio_aux), dtSync_aux_a,
                                               morphTri, morphSaw, morphNotch, notchWidth);
 
                 // Pair B: master = _phase2 (detuned), slave at 2× master
                 float syncSaw_aux_b = HardsyncSaw(_phase2, syncRatio_aux, dtSync_aux_b,
                                                    0f, _master2WrappedLastStep);
-                float morphAuxB = MorphShape(syncSaw_aux_b, FracMul(_phase2, syncRatio_aux),
+                float morphAuxB = MorphShape(syncSaw_aux_b, FracMul(_phase2, syncRatio_aux), dtSync_aux_b,
                                               morphTri, morphSaw, morphNotch, notchWidth);
 
                 auxBuf[i] += 0.25f * (morphAuxA + morphAuxB);
@@ -202,16 +202,27 @@ namespace PedalPlaits.Engines
         // Apply MORPH blend (triangle → saw → notched-saw) to a saw
         // value at a given phase position. Shared by osc 1 and the
         // AUX hardsync slaves so both follow the same MORPH vocabulary.
-        // (Notched component does not currently carry PolyBLEP correction
-        // — see README known limitations.)
-        static float MorphShape(float sawValue, float phase,
+        //
+        // v1.6: wrap-side notch AA. The notched component holds a flat
+        // +1 in the region phase > 1-notchWidth, then drops to the post-
+        // wrap saw value (~-1) when phase wraps. The non-notch region
+        // already inherits PolyBLEP correctly through sawValue's weight.
+        // The notch region's +1→saw transition gets an extra PolyBLEP
+        // term scaled by wNotch. (The notch's *entry*-side transition
+        // at phase = 1-notchWidth is still uncorrected — see README.)
+        static float MorphShape(float sawValue, float phase, float dt,
                                  float wTri, float wSaw, float wNotch,
                                  float notchWidth)
         {
             float tri  = 4f * MathF.Abs(phase - 0.5f) - 1f;
-            float notched = sawValue;
-            if (notchWidth > 0f && phase > 1f - notchWidth) notched = 1f;
-            return wTri * tri + wSaw * sawValue + wNotch * notched;
+            bool inNotch = notchWidth > 0f && phase > 1f - notchWidth;
+            float notched = inNotch ? 1f : sawValue;
+            float morph = wTri * tri + wSaw * sawValue + wNotch * notched;
+            if (inNotch)
+            {
+                morph -= wNotch * PolyBlep.Compute(phase, dt);
+            }
+            return morph;
         }
     }
 }

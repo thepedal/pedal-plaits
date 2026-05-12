@@ -27,6 +27,14 @@
     </Reference>
   </ItemGroup>
 
+  <!-- Plaits bank_3 (Braids-derived) wavetable data, embedded into the
+       DLL so deployment stays single-file. Loaded at engine init by
+       Engines/PlaitsWavetables.cs. MIT-licensed alongside the rest of
+       Plaits' source (pichenettes/eurorack). -->
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\waves.bin" />
+  </ItemGroup>
+
   <!-- Deploy to ReBuzz after every build. Generators live in Gear\Generators.
        ContinueOnError swallows the (expected) lock when ReBuzz is running with
        the DLL loaded — close ReBuzz and rebuild to refresh.

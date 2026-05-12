@@ -2,12 +2,13 @@
 
 ReBuzz managed machine — port of Mutable Instruments' Plaits macro-oscillator.
 
-**Status:** v1.5 — 10 engines, mono voice, OUT + AUX outputs, per-Work
+**Status:** v1.6 — 10 engines, mono voice, OUT + AUX outputs, per-Work
 parameter smoothing (v1.2) + velocity sensitivity routing (v1.3) +
 Plaits-faithful wavetable banks 0/4 and 3/7 + hardsync-formants region
 on engine 0 + vactrol-modeled LPG (v1.4) + AUX faithful rendering for
 engine 0 + scaled-PolyBLEP hardsync AA + LDR non-linearity in vactrol
-(v1.5), 50-preset factory bank.
+(v1.5) + Plaits bank_3 (Braids-derived) for wavetable banks 2/6 +
+wrap-side notched-saw AA (v1.6), 50-preset factory bank.
 
 **Original source:** https://github.com/pichenettes/eurorack/tree/master/plaits
 **License:** MIT (Plaits firmware is MIT-licensed; this port preserves
@@ -133,7 +134,9 @@ navigable 2D map of timbres per bank.
 - **HARMONICS:** bank selection (discrete jump between banks)
   - 0/4: Plaits bank_1 — mild additive (sines, drawbars, comb, pair, tri/saw stacks)
   - 1/5: sine wavefolder with asymmetry (algorithmic)
-  - 2/6: inharmonic partial sums (algorithmic)
+  - 2/6: Plaits bank_3 — Braids-derived voice/digital/metal/drone/fant
+    families (loaded from embedded `waves.bin`; falls back to
+    algorithmic inharmonic if the resource is missing)
   - 3/7: Plaits bank_2 — formantish (trisaw, sawtri, burst, formants, pulse, sine-power)
 
   Banks 0–3 are *interpolated* (smooth TIMBRE/MORPH sweeps).
@@ -242,7 +245,8 @@ ReBuzz Work(IList<Sample[]>, n, mode)
 | `Engines/FmEngine.cs`             | Engine 2 |
 | `Engines/HarmonicEngine.cs`       | Engine 3 |
 | `Engines/WavetableEngine.cs`      | Engine 4 (static wavetables, shared across instances) |
-| `Engines/PlaitsWavetables.cs`     | Plaits-faithful wave generators (bank_1, bank_2 — v1.4) |
+| `Engines/PlaitsWavetables.cs`     | Plaits-faithful wave generators (banks 1, 2, 3 — v1.4/v1.6) |
+| `Resources/waves.bin`             | Plaits' Braids-derived wavetable data, embedded into the DLL (v1.6) |
 | `Engines/GranularCloudEngine.cs`  | Engine 5 |
 | `Engines/FilteredNoiseEngine.cs`  | Engine 6 |
 | `Engines/BassDrumEngine.cs`       | Engine 7 (first percussive) |
@@ -272,24 +276,25 @@ and silences MSB3277. Only the `.dll` is deployed.
 
 ## Known limitations
 
-- **Wavetable engine 4 — banks 1/5 and 2/6** (the wavefolder and
-  inharmonic archetypes) remain algorithmically generated. Plaits'
-  bank_3 (shruthi/ambika/braids-derived) wasn't ported here because it
-  requires the binary `waves.bin` resource from the Plaits source tree,
-  which contains Braids waveform data and isn't redistributed in this
-  port. Banks 0/4 and 3/7 are now built from the same generator
-  functions as Plaits' bank_1 (mild additive) and bank_2 (formantish)
-  respectively — see `Engines/PlaitsWavetables.cs`.
+- **Wavetable engine 4 — banks 1 and 5** (the wavefolder archetype)
+  remain algorithmically generated. Banks 0/4 (Plaits bank_1: mild
+  additive), 3/7 (Plaits bank_2: formantish), and 2/6 (Plaits bank_3:
+  shruthi/ambika/braids-derived) are built from the same generator
+  functions as the Plaits firmware. Bank_3 requires `Resources/waves.bin`
+  to be embedded in the assembly; if the file is missing the engine
+  silently falls back to an algorithmic inharmonic bank.
 - **Wavetable aliasing at very high pitches** (C-7 and above) — no
   mip-mapped table variants. Stay within typical musical ranges for clean
   output.
 - **Engine 0 hardsync AA** (v1.5) uses a scaled-PolyBLEP correction at
   post-master-wrap samples, sized to the actual `-2 × frac(syncRatio)`
-  discontinuity. This handles the audible range cleanly, but the
-  notched-saw component of MORPH on both osc 1 and the AUX slaves is
-  still naïve — its rectangular notch has uncorrected discontinuities
-  at the notch edges and at phase wrap. Audible as a slight roughness
-  on the high-MORPH end of the range at high pitches. A v1.6+ target.
+  discontinuity. The MORPH notched-saw component on osc 1 and the AUX
+  slaves gains wrap-side AA in v1.6 (PolyBLEP scaled by `wNotch`); the
+  *entry-side* notch discontinuity (where the saw value jumps to +1 at
+  phase = 1 − notchWidth) remains uncorrected since it sits mid-cycle
+  and needs an arbitrary-position PolyBLEP rather than the standard
+  wrap-edge form. Audible mainly at MORPH near maximum where the
+  notchWidth and jump magnitude are largest. A v1.7+ target.
 - **Engine 2 (FM)** uses a smooth ratio sweep on HARMONICS rather than
   snapping to musically-useful ratios (0.5, 1, 2, 3, 4, 5, 7, 11…).
   No anti-aliasing on high-modulation-index sidebands either, so very
@@ -330,9 +335,11 @@ architectural change.
 DSP architecture and engine designs by Émilie Gillet (Mutable Instruments),
 released under the MIT license. This C# port preserves that license and is
 not affiliated with or endorsed by Mutable Instruments. The wavetable
-generation functions in `Engines/PlaitsWavetables.cs` (banks 0/4 and 3/7
-of engine 4) are direct ports of the algorithms in
-`plaits/resources/wavetables.py` from the Plaits firmware source.
+generation functions in `Engines/PlaitsWavetables.cs` (banks 0/4, 2/6, and
+3/7 of engine 4) are direct ports of the algorithms in
+`plaits/resources/wavetables.py` from the Plaits firmware source, and
+`Resources/waves.bin` is the original Plaits Braids-derived waveform data
+file redistributed under the same MIT license.
 
 Core ReBuzz managed-machine findings used by this port are documented in
 the project's `ReBuzz_ManagedMachine_Notes_Core.md` (§27 transport stop,

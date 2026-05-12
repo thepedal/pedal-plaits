@@ -47,6 +47,13 @@ namespace PedalPlaits.Engines
         static float[] s_wavetables;
         static readonly object s_genLock = new object();
 
+        // Set by GenerateAllWavetables: true when Plaits' Braids-derived
+        // bank_3 was successfully loaded from the embedded waves.bin
+        // resource, false when the engine fell back to algorithmic
+        // InharmonicSample for archetype 2. Read by Pedalplaits.cs to
+        // print a one-time status line to ReBuzz's debug console.
+        public static bool Bank3FromBraids;
+
         float _sr = 44100f;
         float _baseHz = 220f;
         float _phase;                           // free-running across notes
@@ -170,16 +177,20 @@ namespace PedalPlaits.Engines
         {
             s_wavetables = new float[N_BANKS * N_ROWS * N_COLS * WAVE_LEN];
 
-            // v1.4 — Plaits-faithful waves for archetypes 0 (bank_1: mild
-            // additive) and 3 (bank_2: formantish), ported from
-            // plaits/resources/wavetables.py via PlaitsWavetables.cs.
+            // Plaits-faithful waves for archetypes 0, 3, and (when waves.bin
+            // is embedded in the assembly) archetype 2. Built once at first
+            // Init via PlaitsWavetables.BuildBankN().
             //
-            // Archetypes 1 (wavefold) and 2 (inharmonic) remain algorithmic.
-            // Plaits' bank_3 (shruthi/ambika/braids-derived) is not ported:
-            // it requires plaits/resources/waves.bin, which we don't
-            // redistribute.
+            //   Archetype 0 (banks 0/4) — Plaits bank_1 (mild additive)
+            //   Archetype 1 (banks 1/5) — algorithmic wavefold
+            //   Archetype 2 (banks 2/6) — Plaits bank_3 (Braids-derived)
+            //                              if waves.bin loadable, else
+            //                              algorithmic inharmonic fallback
+            //   Archetype 3 (banks 3/7) — Plaits bank_2 (formantish)
             float[][] plaitsBank1 = PlaitsWavetables.BuildBank1(WAVE_LEN);
             float[][] plaitsBank2 = PlaitsWavetables.BuildBank2(WAVE_LEN);
+            float[][] plaitsBank3 = PlaitsWavetables.BuildBank3(WAVE_LEN);
+            Bank3FromBraids = plaitsBank3 != null;
 
             for (int bank = 0; bank < N_BANKS; bank++)
             {
@@ -201,8 +212,16 @@ namespace PedalPlaits.Engines
                                        s_wavetables, baseIdx, WAVE_LEN);
                             NormalizeCell(baseIdx);
                         }
+                        else if (archetype == 2 && plaitsBank3 != null)
+                        {
+                            Array.Copy(plaitsBank3[row * N_COLS + col], 0,
+                                       s_wavetables, baseIdx, WAVE_LEN);
+                            NormalizeCell(baseIdx);
+                        }
                         else
                         {
+                            // Algorithmic fallback for archetypes 1 (wavefold)
+                            // and 2 (inharmonic, when bank_3 unavailable).
                             GenerateOneCell(bank, archetype, row, col);
                         }
                     }
