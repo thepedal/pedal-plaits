@@ -2,15 +2,16 @@
 
 ReBuzz managed machine — port of Mutable Instruments' Plaits macro-oscillator.
 
-**Status:** v1.7 — 10 engines, mono voice, OUT + AUX outputs, per-Work
+**Status:** v1.8 — 10 engines, mono voice, OUT + AUX outputs, per-Work
 parameter smoothing (v1.2) + velocity sensitivity routing (v1.3) +
 Plaits-faithful wavetable banks 0/4 and 3/7 + hardsync-formants region
 on engine 0 + vactrol-modeled LPG (v1.4) + AUX faithful rendering for
 engine 0 + scaled-PolyBLEP hardsync AA + LDR non-linearity in vactrol
 (v1.5) + Plaits bank_3 (Braids-derived) for wavetable banks 2/6 +
 wrap-side notched-saw AA (v1.6) + integrated wavetable playback
-(Franck-Valimaki K=1) + entry-side notched-saw AA (v1.7), 50-preset
-factory bank.
+(Franck-Valimaki K=1) + entry-side notched-saw AA (v1.7) + FM sideband
+soft-clip AA + two-stage vactrol LPG cascade (v1.8), 50-preset factory
+bank.
 
 **Original source:** https://github.com/pichenettes/eurorack/tree/master/plaits
 **License:** MIT (Plaits firmware is MIT-licensed; this port preserves
@@ -117,8 +118,11 @@ FM-like timbres.
 
 Sine-on-sine FM with self-feedback. Bells, electric pianos, brass, clangs.
 
-- **HARMONICS:** modulator/carrier ratio — smooth sweep 0.25× to 16×
-- **TIMBRE:** modulation index — 0 to 6 radians
+- **HARMONICS:** modulator/carrier ratio — snaps to a table of 11 musically-useful
+  values: 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 7.0, 11.0
+- **TIMBRE:** modulation index — 0 to 6 radians, soft-clipped (v1.8) to keep
+  peak FM sidebands below 90% of Nyquist. At low pitches the response is
+  unchanged; at high pitches the index is smoothly bounded to prevent aliasing.
 - **MORPH:** self-feedback — carrier-self-fb below noon, clean FM at noon, mod-self-fb above
 - **AUX:** sub-oscillator at half the carrier frequency
 
@@ -308,15 +312,18 @@ and silences MSB3277. Only the `.dll` is deployed.
   hardsync interaction with the notched waveform shape, which is
   inherently rich and would benefit from oversampling on extreme
   patches rather than additional BLEP terms.
-- **Engine 2 (FM)** uses a smooth ratio sweep on HARMONICS rather than
-  snapping to musically-useful ratios (0.5, 1, 2, 3, 4, 5, 7, 11…).
-  No anti-aliasing on high-modulation-index sidebands either, so very
-  high pitches with TIMBRE near maximum may grit slightly.
-- **LPG vactrol modeling** (v1.4 + v1.5) is a first-order asymmetric
-  envelope follower (5 ms attack, 30 ms release) with a power-law LDR
-  transfer curve (exponent 1.4) applied to both VCA gain and filter
-  cutoff. The LDR exponent is a single tunable; a more physically
-  accurate two-stage RC + saturation model is possible but deferred.
+- **Engine 2 (FM)** uses a hard ratio table on HARMONICS (no continuous
+  sweep — see the engine reference). Sideband AA via mod-index soft-clip
+  (v1.8) holds peak sidebands below 90% Nyquist; self-feedback paths
+  remain unbounded analytically and may grit at extreme MORPH settings
+  on high notes, but this is musically idiomatic for FM feedback.
+- **LPG vactrol modeling** (v1.4–v1.8) is a two-stage RC cascade — fast
+  symmetric LED stage feeding a slow asymmetric LDR stage — with a
+  power-law LDR transfer curve (exponent 1.4) on the audio path. The
+  LDR exponent is a single tunable rather than a fitted model; a more
+  detailed saturation-aware LDR transfer curve and per-component
+  temperature drift would be the next refinement, but neither is
+  audibly necessary for typical patches.
 - **Mono only.** Polyphony would require significant per-voice memory
   expansion (wavetable + harmonic engines have large per-voice state).
 

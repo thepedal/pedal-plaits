@@ -77,6 +77,19 @@ namespace PedalPlaits.Engines
             // sidebands. Standard FM literature uses radian indices.
             float modIndex = p.Timbre * 6f;
 
+            // ── v1.8 sideband AA — soft-clip mod index so peak sideband
+            // stays below ~90% of Nyquist. For sine-on-sine FM, the
+            // bandwidth scales as f · (1 + I · r). Solving for I gives
+            // the upper safe limit; tanh-soft-clip the requested index
+            // toward that limit so behaviour is unchanged at low pitches
+            // and smoothly bounded at high pitches without a hard knee.
+            // Floor of 0.5 keeps some FM character alive at very high
+            // notes where the analytical safe limit goes near zero.
+            float safeNyquist = _sr * 0.45f;
+            float maxSafeIdx  = MathF.Max(0.5f,
+                                          (safeNyquist / _baseHz - 1f) / ratio);
+            modIndex = maxSafeIdx * MathF.Tanh(modIndex / maxSafeIdx);
+
             // ── MORPH: feedback split around 12 o'clock ──
             // <0.5 → op1 (carrier) self-feedback, "chaotic" character
             // =0.5 → no feedback, clean 2-op FM
