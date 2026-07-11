@@ -118,6 +118,13 @@ namespace PedalPlaits.Engines
                 if (fall2 >= 1f) fall2 -= 1f;
                 pulse2 -= PolyBlep.Compute(fall2, dt2);
 
+                // Remove the pulse's intrinsic DC at the source (Core §43.2a).
+                // A pulse of width pwm has mean 2·pwm − 1; at TIMBRE=0 the width
+                // is 0.05, i.e. a mean of −0.9 — the single largest DC source in
+                // this machine. Exact and stateless, so a swept TIMBRE carries no
+                // wandering offset either.
+                pulse2 -= (2f * pwm - 1f);
+
                 // ── MAIN HARDSYNC SLAVE — variable ratio, scaled PolyBLEP AA ──
                 float syncSaw_main = HardsyncSaw(_phase1, syncRatio_main, dtSync_main,
                                                   fracR_main, _master1WrappedLastStep);
@@ -224,6 +231,15 @@ namespace PedalPlaits.Engines
             bool inNotch = notchWidth > 0f && phase > 1f - notchWidth;
             float notched = inNotch ? 1f : sawValue;
             float morph = wTri * tri + wSaw * sawValue + wNotch * notched;
+
+            // Remove the notched saw's intrinsic DC (Core §43.2a). The triangle
+            // and the plain saw are both zero-mean, but the notched component —
+            // flat +1 over the last `notchWidth` of the period, saw elsewhere —
+            // integrates to notchWidth² over a period:
+            //     ∫₀^(1-w) (2p-1) dp + ∫_(1-w)^1 1 dp  =  -w(1-w) + w  =  w²
+            // so it carries a mean of w², weighted by wNotch. At MORPH=1
+            // (w = 0.4) that's +0.16. Subtract it so MORPH sweeps stay centred.
+            morph -= wNotch * notchWidth * notchWidth;
 
             // Wrap-side notch AA (v1.6) — fires only inside the notch region
             if (inNotch)

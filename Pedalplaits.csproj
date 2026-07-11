@@ -25,6 +25,12 @@
       <HintPath>C:\Program Files\ReBuzz\BuzzGUI.Interfaces.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <!-- MenuItemVM + SimpleCommand for the right-click About window
+         (AboutWindow §1.1). -->
+    <Reference Include="BuzzGUI.Common">
+      <HintPath>C:\Program Files\ReBuzz\BuzzGUI.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
   <!-- Plaits bank_3 (Braids-derived) wavetable data, embedded into the
@@ -35,31 +41,39 @@
     <EmbeddedResource Include="Resources\waves.bin" />
   </ItemGroup>
 
-  <!-- Preset bundle, deployed alongside the DLL after build. Declared as
-       an ItemGroup item rather than an inline SourceFiles literal so the
-       space in the filename round-trips cleanly through MSBuild — literal
-       attribute paths with embedded spaces can produce silent Copy failures
-       on some MSBuild configurations. -->
-  <ItemGroup>
-    <PresetBundle Include="Pedal Plaits_Presets.prs.xml" />
-  </ItemGroup>
-
   <!-- Deploy to ReBuzz after every build. Generators live in Gear\Generators.
        ContinueOnError swallows the (expected) lock when ReBuzz is running with
-       the DLL loaded — close ReBuzz and rebuild to refresh the deployed DLL
-       and preset bundle. The Message lines surface in normal-verbosity build
-       output so a failed deploy is visibly noted rather than entirely silent. -->
+       the DLL loaded — close ReBuzz and rebuild to refresh it.
+
+       The preset bundle MUST be named exactly "Pedal Plaits.prs.xml" (machine
+       name + .prs.xml = the Build §3.1 auto-load form; it was previously on the
+       legacy "_Presets" name and so did not auto-load). The Copy is guarded on
+       Exists() with an explicit Warning per Build §3.5.1: a misnamed or missing
+       bundle would otherwise emit MSB3030, which ContinueOnError silently
+       downgrades to a warning — green build, no presets deployed. -->
   <Target Name="DeployToReBuzz" AfterTargets="Build">
-    <Message Text="Deploying $(TargetFileName) → C:\Program Files\ReBuzz\Gear\Generators\"
+    <PropertyGroup>
+      <_PresetPath>$(MSBuildProjectDirectory)\Pedal Plaits.prs.xml</_PresetPath>
+    </PropertyGroup>
+    <ItemGroup>
+      <_AnyPreset Include="$(MSBuildProjectDirectory)\*.prs.xml" />
+    </ItemGroup>
+
+    <Message Text="Deploying $(TargetFileName) -> C:\Program Files\ReBuzz\Gear\Generators\"
              Importance="high" />
     <Copy SourceFiles="$(TargetPath)"
           DestinationFolder="C:\Program Files\ReBuzz\Gear\Generators\"
           ContinueOnError="true" />
-    <Message Text="Deploying @(PresetBundle) → C:\Program Files\ReBuzz\Gear\Generators\"
+
+    <Message Condition="Exists('$(_PresetPath)')"
+             Text="Deploying preset bundle -> C:\Program Files\ReBuzz\Gear\Generators\"
              Importance="high" />
-    <Copy SourceFiles="@(PresetBundle)"
+    <Copy Condition="Exists('$(_PresetPath)')"
+          SourceFiles="$(_PresetPath)"
           DestinationFolder="C:\Program Files\ReBuzz\Gear\Generators\"
           ContinueOnError="true" />
+    <Warning Condition="!Exists('$(_PresetPath)')"
+             Text="Preset bundle NOT deployed: '$(_PresetPath)' not found. Found instead: @(_AnyPreset). Per Build 3.1 it must be named 'Pedal Plaits.prs.xml' - rename it, or presets won't appear in ReBuzz." />
   </Target>
 
 </Project>

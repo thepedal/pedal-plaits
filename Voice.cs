@@ -25,6 +25,11 @@ namespace PedalPlaits
         readonly Lpg       _lpg = new Lpg();
         readonly DecayEnv  _env = new DecayEnv();
 
+        // DC removal on the raw engine output, pre-LPG (Core §43). One per
+        // output path — OUT and AUX are independent signals.
+        readonly DcBlocker _dcOut = new DcBlocker();
+        readonly DcBlocker _dcAux = new DcBlocker();
+
         int   _currentEngine = 0;
         bool  _active;   // true while anything is producing audio
         bool  _forceFade; // transport-stop override (Core §27)
@@ -57,6 +62,10 @@ namespace PedalPlaits
         {
             _lpg.Init(sr);
             _env.Init(sr);
+            // Recompute the blocker poles for the (possibly changed) rate —
+            // Core §29. State is deliberately not cleared here.
+            _dcOut.SetSampleRate(sr);
+            _dcAux.SetSampleRate(sr);
             for (int i = 0; i < _engines.Length; i++) _engines[i].Init(sr);
         }
 
@@ -66,6 +75,11 @@ namespace PedalPlaits
             if (index == _currentEngine) return;
             _currentEngine = index;
             _engines[_currentEngine].Reset();
+            // Engine change is a full reset, not a note event — wipe the
+            // blocker history so a stale DC from the previous engine can't
+            // bleed into the new one's first buffer.
+            _dcOut.Reset();
+            _dcAux.Reset();
             // Don't reset LPG/env here — let any current note tail decay naturally
             // even if the user mid-note flips the engine selector.
         }
@@ -105,6 +119,16 @@ namespace PedalPlaits
 
             var engine = _engines[_currentEngine];
             engine.Render(outBuf, auxBuf, n, in p);
+
+            // ── DC removal (Core §43) ──────────────────────────────────────
+            // Applied here, on the raw engine output, BEFORE the LPG's VCA. The
+            // engines' DC is a property of the tone, not the envelope, so
+            // pre-VCA the blocker strips a steady DC cleanly; post-VCA it would
+            // chase DC×env(t) and thump on every note-on. Percussive engines
+            // bypass the LPG (they own their envelope), but they still route
+            // through here, so both paths are covered.
+            _dcOut.Process(outBuf, n);
+            _dcAux.Process(auxBuf, n);
 
             // Effective decay — forced-fade overrides to ~5ms tau
             float decay = _forceFade ? 0f : p.Decay;   // 0 maps to ~5 ms in DecayEnv

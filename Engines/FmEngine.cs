@@ -35,6 +35,7 @@ namespace PedalPlaits.Engines
         // Two phase accumulators, normalized 0..1.
         // Free-running across notes (SH101 §7 convention) — no reset on NoteOn.
         float _phase1, _phase2;
+        float _phaseSub;   // independent accumulator for the AUX sub-oscillator
 
         // One-sample-delayed outputs for self-feedback paths.
         float _op1Prev, _op2Prev;
@@ -44,6 +45,7 @@ namespace PedalPlaits.Engines
         public void Reset()
         {
             _phase1 = _phase2 = 0f;
+            _phaseSub = 0f;
             _op1Prev = _op2Prev = 0f;
         }
 
@@ -123,11 +125,23 @@ namespace PedalPlaits.Engines
                 outBuf[i] += op1 * OUT_GAIN;
 
                 // AUX: sub-oscillator (carrier at half frequency).
-                // Derived directly from _phase1 — no separate accumulator.
-                float sub = MathF.Sin(TWO_PI * (_phase1 * 0.5f));
+                //
+                // NOTE (v1.13): this was previously derived as
+                //     sin(TWO_PI * (_phase1 * 0.5f))
+                // which is NOT a half-frequency sine. _phase1 wraps 0→1, so the
+                // argument only ever sweeps 0→π: the result is an always-positive
+                // half-sine hump at the SAME frequency as the carrier, with a mean
+                // of 2/π ≈ 0.637. That produced both a wrong timbre (no sub octave)
+                // and the largest DC offset in the machine — enveloped by the LPG,
+                // so it thumped on every note-on rather than sitting still.
+                //
+                // A real sub needs its own accumulator advancing at half rate and
+                // wrapping over two carrier periods. Zero-mean by construction.
+                float sub = MathF.Sin(TWO_PI * _phaseSub);
                 auxBuf[i] += sub * OUT_GAIN;
 
                 _phase1 += dt1; if (_phase1 >= 1f) _phase1 -= 1f;
+                _phaseSub += dt1 * 0.5f; if (_phaseSub >= 1f) _phaseSub -= 1f;
                 _phase2 += dt2; if (_phase2 >= 1f) _phase2 -= 1f;
             }
         }

@@ -1,16 +1,45 @@
 // ──────────────────────────────────────────────────────────────────────
 // PlaitsWavetables.cs — port of plaits/resources/wavetables.py
 //
+// This file is a direct port of code from Mutable Instruments Plaits and
+// is redistributed under the original MIT license. The notice below is
+// reproduced as MIT requires; see LICENSE for the full text.
+//
+//   Copyright 2016 Emilie Gillet.
+//   Author: Emilie Gillet (emilie.o.gillet@gmail.com)
+//
+//   Permission is hereby granted, free of charge, to any person obtaining
+//   a copy of this software and associated documentation files (the
+//   "Software"), to deal in the Software without restriction, including
+//   without limitation the rights to use, copy, modify, merge, publish,
+//   distribute, sublicense, and/or sell copies of the Software, and to
+//   permit persons to whom the Software is furnished to do so, subject to
+//   the following conditions:
+//
+//   The above copyright notice and this permission notice shall be
+//   included in all copies or substantial portions of the Software.
+//
+//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+//   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+//   BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+//   ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+//   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//   SOFTWARE.
+//
+// ──────────────────────────────────────────────────────────────────────
+//
 // Provides the wave-generation functions Plaits uses to build its
 // wavetable engine's bank_1 (mild additive) and bank_2 (formantish).
 // The functions accept a target table size (Plaits hardware uses 128;
 // this port uses 256 to match Pedal Plaits' existing engine geometry —
 // audibly equivalent, just oversampled).
 //
-// Plaits' bank_3 (shruthi/ambika/braids-derived) is not ported here:
-// it requires plaits/resources/waves.bin (a binary blob of Braids
-// waveform data), which we don't redistribute. Pedal Plaits keeps its
-// existing algorithmic generation for that bank slot.
+// Plaits' bank_3 (shruthi/ambika/braids-derived) requires
+// plaits/resources/waves.bin (a binary blob of Braids waveform data).
+// As of v1.6 that file IS redistributed here, as Resources/waves.bin,
+// under the original MIT license (see LICENSE — third-party notices).
 //
 // All functions return raw waveforms (no normalisation, no DC removal
 // — the caller does both). Functions match the Python algorithms; not

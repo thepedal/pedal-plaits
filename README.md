@@ -17,8 +17,9 @@ engine (v1.10) + extended Karplus-Strong inharmonic string engine
 130-preset factory bank.
 
 **Original source:** https://github.com/pichenettes/eurorack/tree/master/plaits
-**License:** MIT (Plaits firmware is MIT-licensed; this port preserves
-that license and adds attribution — see Credits)
+**License:** MIT — see the `LICENSE` file, which reproduces the MIT notice
+and retains Émilie Gillet's original copyright as MIT requires (the Plaits
+firmware is MIT-licensed; this port preserves that license). See also Credits.
 
 ---
 

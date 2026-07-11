@@ -20,8 +20,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Windows;               // MessageBox (About window)
 using Buzz.MachineInterface;
 using BuzzGUI.Interfaces;
+using BuzzGUI.Common;               // MenuItemVM, SimpleCommand
 using PedalPlaits.Engines;
 
 namespace PedalPlaits
@@ -35,6 +37,43 @@ namespace PedalPlaits
         OutputCount = 2)]   // 0 = OUT, 1 = AUX
     public class Pedalplaits : IBuzzMachine
     {
+        // Single source of truth for the machine version — used by the About
+        // window (AboutWindow §1.3). Bump here on release.
+        internal const string Version = "1.13.0";
+
+        // ── Right-click "About..." menu entry (AboutWindow §1.4) ──────────────
+        // The Mutable credit and MIT notice are surfaced here deliberately: this
+        // machine redistributes MIT-licensed Plaits code and data, and MIT
+        // requires the attribution travel with the distribution. See LICENSE.
+        public IEnumerable<IMenuItem> Commands
+        {
+            get
+            {
+                yield return new MenuItemVM()
+                {
+                    Text = "About...",
+                    Command = new SimpleCommand()
+                    {
+                        CanExecuteDelegate = p => true,
+                        ExecuteDelegate    = p => MessageBox.Show(
+                            $"Pedal Plaits   v{Version}\n\n" +
+                            "Macro-oscillator: 13 engines (virtual analog, waveshaping,\n" +
+                            "FM, harmonic, wavetable, phase distortion, granular, modal,\n" +
+                            "inharmonic string, filtered noise, bass/snare/hi-hat), each\n" +
+                            "with a low-pass gate.\n\n" +
+                            "ReBuzz port by Pedal\n" +
+                            "github.com/thepedal/pedal-plaits\n" +
+                            "MIT License\n\n" +
+                            "DSP architecture and engine designs after Plaits by\n" +
+                            "Emilie Gillet (Mutable Instruments), Copyright 2016,\n" +
+                            "used under the MIT License. This is an independent port,\n" +
+                            "not affiliated with or endorsed by Mutable Instruments.",
+                            "About Pedal Plaits")
+                    }
+                };
+            }
+        }
+
         // ───── ReBuzz constants (Core notes) ─────
         const float SAMPLE_SCALE = 32768f;
         const int   BLOCK_SIZE   = 12;          // Plaits control-rate block

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-gen_presets.py — generates Pedal Plaits_Presets.prs.xml for ReBuzz.
+gen_presets.py — generates Pedal Plaits.prs.xml for ReBuzz.
 
 Run from the project root:
     python gen_presets.py
 
-Writes 'Pedal Plaits_Presets.prs.xml' (UTF-8 with BOM) to the current
+Writes 'Pedal Plaits.prs.xml' (UTF-8 with BOM) to the current
 directory. The csproj's post-build target then copies it to
 C:\\Program Files\\ReBuzz\\Gear\\Generators alongside the .dll.
 
@@ -27,7 +27,7 @@ Adding new parameters in future Pedal Plaits versions:
 """
 
 MACHINE_NAME = "Pedal Plaits"
-OUTPUT_FILE  = "Pedal Plaits_Presets.prs.xml"
+OUTPUT_FILE  = "Pedal Plaits.prs.xml"
 
 # Source declaration order (Pedalplaits.cs). Adding a new
 # parameter? APPEND only — see Build §3.3.
